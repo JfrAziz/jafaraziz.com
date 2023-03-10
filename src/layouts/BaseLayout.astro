@@ -1,0 +1,64 @@
+---
+import { SITE } from "config";
+import type { LayoutProps } from "types";
+import { getOgImagePath } from "@utils/openGraph";
+
+export interface Props extends LayoutProps {}
+
+const { title, description } = Astro.props;
+
+const ogImage = new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin)
+  .href;
+
+const fullTitle = `${title && `${title} - `}${SITE.title}`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description ?? SITE.description} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description ?? SITE.description} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@jfrAziz" />
+    <meta name="twitter:image" content={ogImage} />
+    <meta property="twitter:title" content={fullTitle} />
+    <meta
+      property="twitter:description"
+      content={description ?? SITE.description}
+    />
+
+    <!-- PlusJakartaSans Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Plus+Jakarta+Sans:wght@400;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-image: radial-gradient(
+            circle at 12.5px 12.5px,
+            lightgray 2%,
+            transparent 0%
+          ),
+          radial-gradient(circle at 37.5px 37.5px, lightgray 2%, transparent 0%);
+        background-size: 50px 50px;
+      }
+    </style>
+  </head>
+  <body class="bg-[#f2f2f2] selection:bg-gray-600 selection:text-white">
+    <slot />
+  </body>
+</html>
