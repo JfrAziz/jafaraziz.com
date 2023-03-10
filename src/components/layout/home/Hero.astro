@@ -1,0 +1,38 @@
+---
+import { SITE } from "config";
+import SocialLinks from "./SocialLinks";
+---
+
+<div id="hero" class="mb-12">
+  <div class="py-8">
+    <h1 class="space-y-2 lg:space-y-4">
+      <div class="text-2xl lg:text-6xl font-mono font-extrabold text-gray-800">
+        Hi, I am
+      </div>
+      <div class="relative">
+        <div class="text-4xl lg:text-8xl font-extrabold flex">
+          <div class="bg-gray-800 px-4 lg:px-8 text-white">{SITE.author}</div>
+        </div>
+      </div>
+    </h1>
+  </div>
+  <div class="prose">
+    <p>
+      Welcome to my website! I am a web developer with a passion for creating
+      websites and services. I am using a variety of tools in PHP, Node
+      (Typescript), or Java (Kotlin), such as React/Next.js, Laravel, Spring
+      Boot, and Express.js, to create websites or REST APIs. I have a deep
+      interest in Linux and Docker stuff. Sometimes, I do scripting with Python,
+      Node.js, or Bash to automate my works.
+    </p>
+    <p>
+      I am not expert, but I know a little bit about statistics, data science,
+      and data scraping with R and Python. Currently, I am working as Software
+      Engineer at <strong>Statistics Indonesia</strong>
+    </p>
+    <p>
+      I want to share my knowledge and experiences through this website. You can
+      also follow me on <SocialLinks />
+    </p>
+  </div>
+</div>

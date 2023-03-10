@@ -1,0 +1,24 @@
+---
+import Nav from "@components/layout/Nav.astro";
+import Tag from "@components/layout/content/Tag";
+import BlogList from "@components/blog/BlogList";
+import MainLayout from "@layouts/MainLayout.astro";
+import { getAllTags, getLatestPosts } from "@utils/blog";
+import SectionHeader from "@components/layout/content/SectionHeader";
+
+const tags = await getAllTags();
+const posts = await getLatestPosts();
+---
+
+<MainLayout title="Blog Posts">
+  <Nav />
+  <div id="blog" class="space-y-6">
+    <div class="space-y-4 md:space-y-6 py-4">
+      <SectionHeader title="Topics" description="Explore any topics" />
+      <div class="flex flex-wrap items-center">
+        {tags.map(tag => <Tag className="mb-2 mr-2" tag={tag} />)}
+      </div>
+    </div>
+    <BlogList posts={posts} />
+  </div>
+</MainLayout>

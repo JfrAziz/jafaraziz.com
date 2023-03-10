@@ -1,0 +1,40 @@
+---
+import type { LayoutProps } from "types";
+import MainLayout from "./MainLayout.astro";
+import Nav from "@components/layout/Nav.astro";
+import Tag from "@components/layout/content/Tag";
+import type { BlogFronmatter } from "content/_schemas";
+
+export type Props = LayoutProps & BlogFronmatter;
+
+const { title, date, tags } = Astro.props;
+---
+
+<MainLayout {...Astro.props}>
+  <Nav subitem="blog" />
+  <div class="mb-6 mt-2 border-b">
+    <div class="text-xs text-gray-700 mb-2">
+      {
+        date.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      }
+    </div>
+    <div class="space-y-4">
+      <h1
+        class="font-bold text-gray-700 text-2xl leading-relaxed lg:text-4xl lg:leading-tight"
+      >
+        {title}
+      </h1>
+      <div class="flex flex-wrap items-center">
+        {tags.map(tag => <Tag className="mb-2 mr-2" tag={tag} />)}
+      </div>
+    </div>
+  </div>
+  <article class="mt-2 mb-8 prose prose-headings:text-gray-700">
+    <slot />
+  </article>
+</MainLayout>

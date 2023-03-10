@@ -1,0 +1,25 @@
+---
+import Icon from "astro-icon";
+import Logo from "@components/layout/Logo";
+import BaseLayout from "@layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="No resources found">
+  <div class="h-screen flex items-center justify-center">
+    <div class="flex items-center justify-center">
+      <div class="flex flex-col items-center space-y-8">
+        <Logo size={64} />
+        <div class="font-mono text-sm">
+          No Resource Found - {Astro.url.pathname}
+        </div>
+        <a
+          href="/"
+          class="flex items-center border border-gray-700 py-1 px-2 rounded-sm"
+        >
+          <Icon class="w-6 mr-2" name="ph:house-line-light" />
+          <span class="font-mono text-sm">jafaraziz.com</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
