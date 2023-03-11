@@ -40,11 +40,18 @@ const fullTitle = `${title && `${title} - `}${SITE.title}`;
     />
 
     <!-- PlusJakartaSans Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      rel="preload"
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Plus+Jakarta+Sans:wght@400;800&display=swap"
+      as="style"
+    />
+
+    <link
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Plus+Jakarta+Sans:wght@400;800&display=swap"
+      media="print"
+      onload="this.media='all'"
     />
     <style>
       body {
