@@ -1,5 +1,4 @@
 import mdx from "@astrojs/mdx";
-import image from "@astrojs/image";
 import preact from "@astrojs/preact";
 import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
@@ -21,9 +20,6 @@ export default defineConfig({
   },
   integrations: [
     tailwind(),
-    image({
-      serviceEntryPoint: "@astrojs/image/sharp",
-    }),
     mdx({
       syntaxHighlight: "shiki",
       shikiConfig: {
