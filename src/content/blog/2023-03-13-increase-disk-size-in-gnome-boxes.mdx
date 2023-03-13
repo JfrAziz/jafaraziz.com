@@ -1,0 +1,66 @@
+---
+title: "Increase Virtual Machine Disk in Gnome Boxes"
+description: How to increase disk size in Gnome Boxes and move the unallocated partition with GParted
+tags: ["linux", "windows", "tutorial"]
+date: "2023-03-13"
+---
+
+In the latest tutorial, I have explain about how to setup Gnome Boxes for Windows 11 Installation with TPM and UEFI support. In this tutorial we will talk about how to increase VM disk size for an existing VM. Before we continue, I am using version 43.3, and I will update this tutorial for the next release. For this tutorial, I will use Windows 11 that I created before.
+
+![Gnome Boxes Version](/assets/images/2023-03-13/1-gnome-boxes-version.png)
+
+Gnome Boxes has utilties to change storage limit, but when you change it to an existing VM, it does not affect anything. So I do a little trick to increase the disk. Here we go. First of all, You must <strong>clone</strong> the VM (Box) (Right Click and select Clone), and cloning process started. I am not sure why we have to do this haha, but it's work.
+
+After cloning process completed, you have a new VM. Click `Properties` and change the storage limit.
+
+![Storage Limit of VM Clone](/assets/images/2023-03-13/2-storage-limit-of-vm-clone.png)
+
+Here, I am increasing from 25GB to 30GB storage limit. (Pleas note, I am using super minimalist Windows 11 configuration that can run on 2GB ram and 25 Storage).
+
+Now let's try run the VM. If you got this error, just go back and Force Shutdown the VM. This error mean that we use Legacy BIOS not UEFI, so we must edit the configuration files. If you don't face this issue, continue to the next step.
+
+![Legacy BIOS](/assets/images/2023-03-13/3-legacy-bios.png)
+
+Right click on VM and select `Properties`, and go to `Edit Configuration`. Find `<os>...</os>` tag and add this line
+
+```xml
+<os>
+  ...
+  <loader readonly="yes" secure="yes" type="pflash">/usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd</loader>
+  ...
+</os>
+```
+
+Save and try running again the VM, and now you will get the VM Running in UEFI BIOS. When booting completed, go to disk manager. Because I am using Windows, so I go to `Create and Format Hardisk Disk Partition`. We got a new unallocated space, in this case it just 5 GB. We will increase the C Partition. 
+
+![Unallocated Partition on Disk Management](/assets/images/2023-03-13/4-unallocated-partition-on-disk-management.png)
+
+Now we have another problems to solve before we can extend the disk size. See, the unallocated space is in the right side of the C Partition after the Recovery Partition. We cannot extend the C Partition from unallocated space. To move unallocated space to be in between C Partition and Recovery Partition we need another tools. You can use the paid software for this, e.g Easeus, I will use GParted instead.
+
+You can download GParted Live CD ISO from the [official website](https://gparted.org/download.php). First, shutdown your VM and open Properties, go to Device & Shares tab, and add Gparted Live CD to the CDROM/DVD Drive.
+
+![Insert GParted Live CD](/assets/images/2023-03-13/5-insert-gparted-live-cd-to-cd-rom.png)
+
+Now, let's run the VM again, but before we boot into Windows 11. Press <kbd>F2</kbd> to enter BIOS Menu. From there, boot to GParted ISO from DVD-ROM. 
+
+![BIOS Select Boot Manager](/assets/images/2023-03-13/6-BIOS-select-boot-manager.png)
+
+Now we boot to Gparted Live CD, and we can see the drive we will extend and the unallocated space.
+
+![GParted Live CD](/assets/images/2023-03-13/7-gparted-live-cd.png)
+
+Let's start from moving the Recovery Partition to end of partition table. Right click the partition, select Rezie/Move and drag to the end. 
+
+![Move Windows Recovery Partition](/assets/images/2023-03-13/8-move-windows-recovery-partition.png)
+
+Now for C partition, extend the C partition to get all unallocated space.
+
+![Extend C partition](/assets/images/2023-03-13/9-extend-c-partition.png)
+
+Finally, Apply all Operation and wait for gparted to process the task.
+
+![GParted Operations](/assets/images/2023-03-13/10-gparted-operations.png)
+
+Shutdown the GParted Live CD, remove the Iso from CD-ROM/DVD Drive, and Boot to Windows. We have completed to increase the disk. 
+
+![Final Disk Management](/assets/images/2023-03-13/11-final-disk-management.png)
