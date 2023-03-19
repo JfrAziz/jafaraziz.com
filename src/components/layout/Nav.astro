@@ -15,5 +15,15 @@ const { subitem } = Astro.props;
     <Icon class="w-4 mr-2" name="ph:arrow-left" />
     <span class="flex-1 capitalize">{subitem ?? "Home"}</span>
   </a>
-  <div><Logo /></div>
+  <div class="flex items-center">
+    <a
+      href="https://github.com/jfrAziz"
+      referrerpolicy="no-referrer"
+      target="_blank"
+      title="GitHub"
+    >
+      <Icon class="w-6 mr-2 font-bold" name="ph:github-logo-fill" />
+    </a>
+    <a href="/" title="Home"><Logo /></a>
+  </div>
 </div>
