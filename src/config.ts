@@ -18,6 +18,10 @@ export const SOCIALS: SocialLink[] = [
     href: "https://instagram.com/jafar.h.aziz",
   },
   {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/in/jfraziz"
+  },
+  {
     name: "Email",
     href: "mailto:aziz@jafaraziz.com",
   },
