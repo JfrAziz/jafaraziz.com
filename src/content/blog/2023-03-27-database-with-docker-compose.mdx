@@ -1,0 +1,196 @@
+---
+title: "Database With Docker Compose: PostgreSQL, MySQL, SQL Server, Mongo"
+description: Collection of docker-compose script to running database such as postgresql, mysql, sqlserver, and mongodb, with some DBMS
+tags: ["virtualization", "database", "tutorial"]
+date: "2023-03-27"
+---
+
+Docker is one of best virtualization tools to run any container without any struggle. This blogs does not explain anything about docker and docker-compose, just a collection of docker-compose script to running database such as postgresql, mysql, sqlserver, and mongodb with some basic configuration. You can copy and running in you machine. All docker-compose file will be setup with `.env` file, so it can be modify easily. Let's begin with PostgreSQL.
+
+## Postgre SQL
+
+PostgreSQL is one of the best SQL Database, and it is Open Source. It has been used by numerous organizations, if you know [supabase](https://supabase.com/), they use postgresql for the database. Here the docker-compose to run postgresql:
+
+```yaml
+version: "3"
+
+networks:
+  postgres:
+    name: ${DB_CONTAINER:-postgres}
+
+volumes:
+  db:
+    name: ${DB_CONTAINER:-postgres}
+
+services:
+  postgres:
+    image: postgres:alpine
+    container_name: ${DB_CONTAINER:-postgres}
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-secret}
+      - POSTGRES_DB=${DB_DATABASE:-postgres}
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - postgres
+
+  pgweb:
+    image: "sosedoff/pgweb"
+    container_name: pgweb
+    ports:
+      - "8082:8081"
+    networks:
+      - postgres
+    environment:
+      - SESSIONS=1
+      - LOCK_SESSION=TRUE
+      - DATABASE_URL=postgres://${DB_USERNAME:-postgres}:${DB_PASSWORD:-secret}@${DB_CONTAINER:-postgres}:5432/${DB_DATABASE:-postgres}?sslmode=disable
+    depends_on:
+      - postgres
+```
+
+You can modify anything from database secret to docker volumne name. To do so, create `.env` file in the same directory as the `docker-compose.yml` file, and add the required environment varibale with your desired value.
+
+```
+DB_CONTAINER="docker-container-name"
+
+DB_DATABASE="yourdatabasenname"
+
+DB_USERNAME="yourdatabaseuser"
+
+DB_PASSWORD="yourdatabasepassword"
+```
+
+For instance, the line `POSTGRES_DB=${DB_DATABASE:-postgres}`  utilizes `DB_DATABASE` variable from the environment variable file (`.env`) to set the `POSTGRES_DB`, and if the variable does not exist, it defaullt to `postgres`.
+
+You might have noticed another service named [`pgweb`](http://sosedoff.github.io/pgweb/), it's a simple and minimal web tools build in go to manage postgresql database that you can deploy on your machine. It is optional, but I personally use this tool while developing anything with PostgreSQL."
+
+## MySQL
+
+It's not complete when you talk about database without mentioning MySQL. Which is one of the most popular SQL Databases. Here is an example of the `docker-compose` file to run MySQL:
+
+```yaml
+version: "3"
+
+networks:
+  mysql:
+    name: ${DB_CONTAINER:-mysql}
+
+volumes:
+  mysql_data:
+    name: ${DB_CONTAINER:-mysql}
+
+services:
+  mysql:
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: ${DB_CONTAINER:-mysql}
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_USER=${DB_USERNAME:-yourusername}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-yoursecret}
+      - MYSQL_DATABASE=${DB_DATABASE:-yourdatabase}
+    ports:
+      - 3307:3307
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mysql
+```
+
+the `command` attributes allows you to add some options to the default MySQL configuration, for example you want to use `mysql_native_password` as authentication plugin instead of `caching_sha2_password` (the default authentication plugin for MySQL 8.0 or higher). Additionally, you can change the default encoding to UTF-8 (`--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci`), and any other options that MySQL supports. MySQL by default need root password, and you need to specify one of the following as an environment variable:
+
+- `MYSQL_ROOT_PASSWORD`, to add root password
+- `MYSQL_ALLOW_EMPTY_PASSWORD`, to use empty password for root user (not recommended)
+- `MYSQL_RANDOM_ROOT_PASSWORD`, set to `yes` or `true` to use random generated password. The generated root password will be printed to stdout.
+
+For the `.env` file, you can use this example
+
+```
+DB_CONTAINER="docker-container-name"
+
+DB_ROOT_PASSWORD="your root db password"
+
+DB_DATABASE="yourdatabasenname"
+
+DB_USERNAME="yourdatabaseuser"
+
+DB_PASSWORD="yourdatabasepassword"
+```
+
+## SQL Server
+
+SQL Server is SQL Database fdeveloper by Microsoft. SQL Server in Docker was introduced in versions 2017, 2019, and 2022 using Ubuntu-based images. Before 2017, you must install it manually in windows
+
+```yaml
+version: "3"
+
+volumes:
+  sql-server:
+    name: ${DB_CONTAINER:-sql-server}
+
+services:
+  sql-server:
+    container_name: sql-server
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD:-password}
+      - ACCEPT_EULA=Y
+    volumes:
+      - sql-server:/var/opt/mssql
+```
+
+The different SQL Server compared to MySQL and PostgreSQL, SQL Server needs you to accept their EULA 😄, and use `sa` or sysadmin user instead of `root` 😄. To use that `docker-compose` file, create `.env` file like this
+
+```
+DB_CONTAINER="sql-server"
+
+DB_PASSWORD="db_password"
+```
+
+## MongoDB
+
+MongoDB is different from the previous three databases. MongoDB is NoSQL (Not Only SQL) database that have collections and text documents containing name-value pairs, respectively. Here the script to run mongodb in docker-compose
+
+```yaml
+version: "3"
+
+volumes:
+  mongo:
+    name: ${DB_CONTAINER:-postgres}
+
+services:
+  mongodb:
+    container_name: mongo
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME:-mongo}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD:-mongo}
+```
+
+Like the other databases, create `.env` file and add the following variables
+
+```
+DB_CONTAINER="container-name"
+
+DB_USERNAME="yourdatabaseuser"
+
+DB_PASSWORD="yourdatabasepassword"
+```
+
+To connect to mongodb database that we created, you can use apps like [MongoDB Compass](https://www.mongodb.com/products/compass), and use connection string like this `mongodb://<username>:<password>@localhost:27017/`
+
+
+## Conclusion
+
+That's it, we discussed the setup of various popular databases using Docker and Docker Compose. We covered PostgreSQL, MySQL, SQL Server, and MongoDB. Hope this help you 😄
