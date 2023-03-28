@@ -100,7 +100,8 @@ const Template = (props: OgData) => (
 export const getOgImagePath = (filename: string = SITE.title) => {
   if (filename.startsWith("/")) filename = filename.substring(1);
 
-  if (filename.endsWith("/")) filename = filename.substring(0, filename.length -1)
+  if (filename.endsWith("/"))
+    filename = filename.substring(0, filename.length - 1);
 
   if (filename === "") filename = SITE.title;
 

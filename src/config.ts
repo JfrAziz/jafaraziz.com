@@ -19,7 +19,7 @@ export const SOCIALS: SocialLink[] = [
   },
   {
     name: "LinkedIn",
-    href: "https://www.linkedin.com/in/jfraziz"
+    href: "https://www.linkedin.com/in/jfraziz",
   },
   {
     name: "Email",
