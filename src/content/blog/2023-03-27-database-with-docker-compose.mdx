@@ -65,7 +65,7 @@ DB_USERNAME="yourdatabaseuser"
 DB_PASSWORD="yourdatabasepassword"
 ```
 
-For instance, the line `POSTGRES_DB=${DB_DATABASE:-postgres}`  utilizes `DB_DATABASE` variable from the environment variable file (`.env`) to set the `POSTGRES_DB`, and if the variable does not exist, it defaullt to `postgres`.
+For instance, the line `POSTGRES_DB=${DB_DATABASE:-postgres}` utilizes `DB_DATABASE` variable from the environment variable file (`.env`) to set the `POSTGRES_DB`, and if the variable does not exist, it defaullt to `postgres`.
 
 You might have noticed another service named [`pgweb`](http://sosedoff.github.io/pgweb/), it's a simple and minimal web tools build in go to manage postgresql database that you can deploy on your machine. It is optional, but I personally use this tool while developing anything with PostgreSQL."
 
@@ -189,7 +189,6 @@ DB_PASSWORD="yourdatabasepassword"
 ```
 
 To connect to mongodb database that we created, you can use apps like [MongoDB Compass](https://www.mongodb.com/products/compass), and use connection string like this `mongodb://<username>:<password>@localhost:27017/`
-
 
 ## Conclusion
 
