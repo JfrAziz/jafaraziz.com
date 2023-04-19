@@ -1,0 +1,333 @@
+---
+title: "Rplumber, Built REST API with R Part 2: Routing and Request Validation"
+description: Develop REST API with R using Rplumber, from hello world, logging, error handler, request validation, to deploy with docker
+tags: ["Rlang", "tutorial", "API"]
+date: "2023-04-16"
+---
+
+## Previous Part
+
+In our [previous post](./rest-api-with-r-part-1), we demonstrated how to create a custom logging and error handling system for a basic Rplumber app. In this post, we will delve into setting up a routing system and request validation. If you wanna check another part, please refer to the links below
+
+ - [Part 1 : Project Setup, Logging, and Error Handling](./rest-api-with-r-part-1) 
+ - Part 2 : Routing and Request Validation 🚀 
+ - [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
+
+> Talk is cheap, show me the code
+
+TL:DR, If you wanna read the code, it is available on [this repo](https://github.com/JfrAziz/r-plumber). This is the final version from this tutorial, If you have any issues in the code, feel free to return to this page for reference
+
+## Routing
+
+### Annotation
+
+Plumber allows you to create a web API ith `roxygen2` like comments or annotation, like the code shown below:
+
+```r
+# routes/route.R
+
+#* Return a message
+#* @param msg The message to echo
+#* @serializer unboxedJSON
+#* @get /
+function(msg="") {
+  list(msg = paste0("The message is: '", msg, "'"))
+}
+
+#* Return a hello message
+#* @serializer unboxedJSON
+#* @get /hello
+function(msg="") {
+  list(msg = 'Hallo from /hello endpoint')
+}
+```
+
+That comment before the function, will generate `GET /` and `GET /hello` endpoint and their corresponding Swagger documentation. You can add more information to the annotations, such as HTTP method, parameters information, serializers which is what the API response to be serializer (png, json, unboxedJSON, text, etc), parser for parsing the request to some data type such as csv, file, dataframe, etc. To learn more about using annotation you can refer to [Rplumber official documentation](https://www.rplumber.io/articles/annotations.html#block-annotations), and experiment with it.
+
+### Mounting Routes
+
+In the previous post, we have organize the project dir like this
+
+```
+.
+├── app.R
+├── docker-compose.yml
+├── Dockerfile
+├── helpers
+│   └── *.R
+└── routes
+    ├── route-A.R
+    ├── route-B.R
+    └── subfolders
+        └── route-A.R
+```
+
+Any `*.R` files in the routes dir or the subdir, must be formatted like the code before (e.g with annotation). Then we will load all the `*.R` files there in our `app.R` with `pr_mount`.
+
+```r
+# app.R
+
+r_routes_file_names = list.files(path = './routes' ,full.names=TRUE, recursive=TRUE)
+for (file_name in r_routes_file_names) {
+  route_name = substring(file_name, 10, nchar(file_name) - 2)
+  app %>%
+    pr_mount(route_name, pr(file_name) %>% pr_set_error(error_handler))
+}
+```
+
+Add this code to the `app.R` file. What that code doing is list all the files in routes dir including in the subdirectory. then mount it to current plumber with the file names represent the base route for all endpoints in the that file.
+
+- If we have route file called `route-A.R` and in that files we have `/` and `/hello` endpoint, the final endpoint will be `/route-A.R/` and `/route-A/hello` . 
+- Subdirectory with the same name to route files in base folder will be ignored. In example you have `./routes/subdir/route-A.R` and `./routes/subdir.R`, the `./routes/subdir/route-A.R` will be ignored because it will clash with the endpoint from `./routes/subdir.R`
+
+> Is up to you, to setup a new route, but be carefully don't use the same routes twice
+
+### Basic Example
+
+Let's take a look in the real scenario, example we have 3 routes file.
+
+- `/routes/route-A.R`
+- `/routes/route-B.R`
+- `/routes/subdir/route-A.R`
+
+and each of them, we fill it with the same code in the first example. Then, you can check in swagger ui you will get this routes
+
+```
+GET /route-A/
+GET /route-A/hello
+GET /route-B/
+GET /route-B/hello
+GET /subdir/route-A/
+GET /subdir/route-A/hello
+```
+
+Now to create a new routes, just create files in `routes` dir with rplumber annotation. For more advance routing, like dynamic routing you can read it in [the docs](https://www.rplumber.io/articles/routing-and-input.html).
+
+## Request Validation
+
+When building an API, it's important to valiadate the incoming request. Validation can prevent error and ensure the incoming data is in the correct format and meets the expected requirements before processing the data. In this section, we will create a basic validation method for validate all request in Rplumber, such as make the params required, check the params data type (data, formula, number, boolean, etc), check the value exist in given array, and other validations.
+
+### Validator Functions
+
+I am using custom function to check the value match to some condition, and then we can use the function to check all the request data. Create `helpers/validator.R` file and let's take a look to functions below that I have created:
+
+```r
+# helpers/validator.R
+
+# check all attributes are exist in data object
+# send bad_request error if one of the attributes is
+# not exist
+checkRequired <- function(data, attributes = c()) {
+    lapply(attributes, function(attribute) {
+        if (!exists(attribute, data)) bad_request(paste0(attribute, " is required"))
+    })
+}
+
+# check the value is a data (array of object in js)
+# and the length is not 0 or empty. the function alse
+# return the data.
+checkData <- function(data, attributeName = "data") {
+    if (!is.list(data) || length(data) == 0) bad_request(paste0(attributeName, " must be an array and not empty"))
+    return(data)
+}
+
+# check the value is array, e.g [1,2,3,4,5], not [] and
+# will return the array, throw error otherwise.
+checkArray <- function(data, attributeName = "data") {
+    if (!is.vector(data) || length(data) == 0) bad_request(paste0(attributeName, " must be an array and not empty"))
+    return(data)
+}
+
+# check the value is array, and give empty array
+# if the value is not a array, invalid, or NULL
+checkVector <- function(data = c()) {
+  if (!is.vector(data) || is.list(data)) return(c())
+
+  data <- data[!is.na(data)]
+
+  if (length(data) == 1 && !nzchar(data[1])) return(c())
+
+  return(data[nzchar(data)])
+}
+
+# check the value is string and is in formula format
+# e.g y~x1+x2 etc, and return it as a R formula. throw error otherwise
+checkFormula <- function(formula, attributeName = "formula") {
+    return(tryCatch(as.formula(formula),
+        error = function(error) bad_request(paste0(attributeName, " is not valid, example: y~x1+x2..."))
+    ))
+}
+
+# check the value is a number or numeric, give back the value.
+# throw error if the value is not a number
+checkNumber <- function(value, attributeName = "number") {
+    if (!is.numeric(value)) bad_request(paste0(attributeName, " is not number"))
+    return(value)
+}
+
+# check if the value exist in the given array.
+# example is 3 exist in [3,4,5,6]?
+checkInArray <- function(value, array) {
+    if (!(value %in% array)) bad_request(paste0(value, " is not in: ", paste0(array, collapse = ", ")))
+    return(value)
+}
+
+# check the value is in boolean, e.g FALSE, false,
+# TRUE, true, 0, 1, etc. return back the boolean value
+checkBoolean <- function(value) {
+    if (!(tolower(value) %in% c("true", "false", 1, 0))) bad_request(paste0(value, " is not valid boolean"))
+    return(tolower(value) == "true" || tolower(value) == 1)
+}
+
+# set the maximum number of the given value.
+# setMaxNumber(4, 3) -> 3
+setMaxNumber <- function(value, max){
+    if(value < max) return(value)
+    return(max)
+}
+```
+
+You can create your own validator function for your need. Next, to use that validator functions, we need to import `helpers/validator.R` into our `app.R`. Now we can use it anywhere in the project, by simply calling the function name
+
+```r
+# app.R
+
+# ... rest of code
+
+source("./helpers/validator.R")
+
+# ... rest of code
+```
+
+### Example Endpoint
+
+Let'see we want send a POST request with JSON body like the example below and validate it with those function. You can test it using Postman, Insomnia, cURL, or any similiar tools you like.
+
+```json
+{
+  "boolean": true,
+  "max_number": 40,
+  "number_value": 123,
+  "in_array": "setosa",
+  "formula": "y ~ x1 + x2",
+  "number_list": [1, 2, 3, 4],
+  "with_null_list": [1, null, 3, "hallo"],
+  "data": [
+    {
+      "columnA": 10,
+      "columnB": 20
+    },
+    {
+      "columnA": 30,
+      "columnB": 40
+    }
+  ]
+}
+```
+
+Here the example endpoint to validate that request.
+
+```r
+# routes/data.R
+
+#* Test Post Param With Validation
+#* @serializer unboxedJSON
+#* @post /validate
+function(req, res) {
+  # check all the parameters exist in
+  # request body
+  checkRequired(req$body, c(
+    "boolean",
+    "max_number",
+    "number_value",
+    "in_array",
+    "formula",
+    "number_list",
+    "with_null_list",
+    "data"
+  ))
+
+  # now validate all the params one by one.
+
+  # check the boolean params is truly a boolean
+  # TRUE, TrUe, false, 0, 1 is acceptable
+  boolVar <- checkBoolean(req$body$boolean)
+
+  # check numeric value and maximum value.
+  # before set the maximum value, we need to
+  # validate if the params is a number
+  numberVar <- checkNumber(req$body$number_value, "number_value")
+  maxNumberVar <- setMaxNumber(checkNumber(req$body$max_number, "max_number"), 50)
+
+  # the value must exist in the given array
+  inArrayVar <- checkInArray(req$body$in_array, c('setosa', 'versicolor', 'virginica'))
+
+  # the value must be a R formula format
+  formulaVar <- checkFormula(req$body$formula, "Formula")
+
+  # check the value is an array
+  numberListVar <- checkArray(req$body$number_list, "number_list")
+
+  # sanitize the value to an array and remove the
+  # NULL value.
+  withNullListVar <- checkVector(req$body$with_null_list)
+
+  # check the values is a data, which is a array of object in
+  # json.
+  dataVar <- checkData(req$body$data, "data")
+
+  # now you can use all the request params safely
+  # for your need. in this example, I just return it back
+
+  return(list(
+    boolean = boolVar,
+    max_number = maxNumberVar,
+    number_value = numberVar,
+    in_array = inArrayVar,
+    formula = deparse1(formulaVar),
+    number_list = numberListVar,
+    with_null_list = withNullListVar,
+    data = dataVar
+  ))
+}
+
+```
+
+You can test the endpoint by sending POST request like this
+
+```bash
+curl -s -X POST 'http://localhost:8000/data/validate' \
+-H 'Content-Type: application/json' \
+-d '{
+  "boolean": true,
+  "max_number": 40,
+  "number_value": 123,
+  "in_array": "setosa",
+  "formula": "y ~ x1 + x2",
+  "number_list": [1, 2, 3, 4],
+  "with_null_list": [1, null, 3, "", "hallo"],
+  "data": [
+    {
+      "columnA": 10,
+      "columnB": 20
+    },
+    {
+      "columnA": 30,
+      "columnB": 40
+    }
+  ]
+}' | jq
+```
+
+If you modify the body part to incorect value, in example we change the `number_value` params to a string, you will get this kind of error
+
+```json
+{
+  "code": 400,
+  "message": "number_value is not number"
+}
+```
+
+## Next Part
+
+In this part, we have discussed about how to setup a file based like routing with Rplumber and add some request validation. In the next part, we will discussed about deploying Rplumber with Docker. Here the link to continue to the [next part](./rest-api-with-r-part-3).
