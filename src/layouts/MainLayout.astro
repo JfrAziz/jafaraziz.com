@@ -1,4 +1,5 @@
 ---
+import Icon from "astro-icon";
 import type { LayoutProps } from "types";
 import BaseLayout from "./BaseLayout.astro";
 
@@ -10,8 +11,18 @@ export type Props = LayoutProps;
     <main class="mb-4">
       <slot />
     </main>
-    <footer class="border-t text-sm font-mono pt-2 text-gray-700">
-      {new Date().getFullYear()} - Jafar Aziz
+    <footer
+      class="border-t text-sm font-mono pt-2 text-gray-700 flex justify-between items-center"
+    >
+      <span>{new Date().getFullYear()} - Jafar Aziz</span>
+      <a
+        href="https://github.com/jfrAziz"
+        referrerpolicy="no-referrer"
+        target="_blank"
+        title="GitHub"
+      >
+        <Icon class="w-6 mr-2 font-bold" name="ph:github-logo-fill" />
+      </a>
     </footer>
   </div>
 </BaseLayout>
