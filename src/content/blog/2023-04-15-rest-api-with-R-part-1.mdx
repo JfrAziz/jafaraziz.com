@@ -1,0 +1,284 @@
+---
+title: "Rplumber, Built REST API with R Part 1: Project Setup, Logging, and Error Handling"
+description: Develop REST API with R using Rplumber, from hello world, logging, error handler, request validation, to deploy with docker
+tags: ["Rlang", "tutorial", "API"]
+date: "2023-04-15"
+---
+
+If you have used R, you must heard about Rshiny. Rshiny is a good tool to build data driven interactive website, like dashboard or simulation tools with R. But, for some reasons Rshiny is not good idea to choose when you need to build a service where the users access it programatically, e.g API. We use the API in another system or apps, so we can integrate our existing system with R. In example, we have developed forecasting model with R and we want use it in our exsiting app, so we must develop API with R and not a full interactive apps like Rshiny does. 
+
+And here Rplumber comes in. Rplumber is library to make an API from R developed by Rstudio. In this post, we will talk about how to develop a API with Rplumber from routing, error handling, logging, request validation, to hosting it with docker. This tutorial comes with a few parts.
+
+ - Part 1 : Project Setup, Logging, and Error Handling 🚀 
+ - [Part 2 : Routing and Request Validation](./rest-api-with-r-part-2)
+ - [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
+
+> Talk is cheap, show me the code
+
+TL:DR, If you wanna read the code, it is available on [this repo](https://github.com/JfrAziz/r-plumber). This is the final version from this tutorial, If you have any issues in the code, feel free to return to this page for reference
+
+## Hello World
+
+Before we get started, Note that, I am not using r-packages or using virtual environemnt with renv. I want to keep it simple, so to manage package installation I am using it in docker. I will organize project structure like this:
+
+```
+.
+├── app.R
+├── docker-compose.yml
+├── Dockerfile
+├── helpers
+│   ├── error.R
+│   ├── logging.R
+│   └── validator.R
+└── routes
+    ├── route-A.R
+    └── route-B.R
+```
+
+`app.R` is the entry point to run this project, any `*.R` files in helpers directory is just helpers function for the API like logging, error handling, validation, etc. `Dockerfile` and `docker-compose.yml` to manage packages installation and deploy the app later. You can create the files on each step, and I will explain it on the process.
+
+Before we continue, make sure you have install Rplumber on your machine. You can run `remotes::install_github('rstudio/plumber@main')` on R console. We install the latest version of rplumber directly from the Github Repository.
+
+Then we create `app.R`, and add this following code
+
+```r
+library(plumber)
+
+# load env variables
+host <- Sys.getenv("HOST", "127.0.0.1")
+port <- strtoi(Sys.getenv("PORT", 8000))
+
+# App initialization and settings for warning, trailing slash
+app <- pr()
+options(warn = -1)
+options_plumber(trailingSlash = TRUE)
+
+# Simple Routes
+app %>%
+  pr_get("/", function(req, res){
+    return(list(message = "Welcome R Services"))
+  }, serializer = plumber::serializer_unboxed_json()) %>%
+
+# run plumber
+app %>%
+  pr_run(host = host, port = port)
+```
+
+Now to run the apps, if you use Rstudio there a option to run the API. But if you want to run this API from console (terminal / cmd), you can run `Rscript app.R`. If it run successfully, you get the following logs
+
+```
+# Plumber router with 1 endpoint, 4 filters, and 0 sub-routers.
+# Use `pr_run()` on this object to start the API.
+├──[queryString]
+├──[body]
+├──[cookieParser]
+├──[sharedSecret]
+├──/ (GET)
+Running plumber API at http://127.0.0.1:8000
+Running swagger Docs at http://127.0.0.1:8000/__docs__/
+```
+
+The plumber is running on [http://127.0.0.1:8000](http://127.0.0.1:8000) and Rplumber will generate [swagger docs](http://127.0.0.1:8000/__docs__/) automatically. 
+
+```bash
+$ curl -s -X GET localhost:8000 | jq
+{
+  "message": "Welcome R Services"
+}
+```
+
+There it is, we just finnished the hello world 😄
+
+
+## Logger
+
+Log is one of the important part in API because it allows developers to diagnose issues that may arise when the application was running. To log in R, we can use bunch of `printf` function, but we can do it better and more efficient way. We need install library called `logger`, open the R console and run this script `install.packages(c('logger','tictoc', 'fs'))` .
+
+Then create `helpers/logging.R` files, and add the following code
+
+```r
+# helpers/logging.R
+
+library('logger')
+library('tictoc')
+
+# write logs to file
+log_dir <- "logs"
+if (!fs::dir_exists(log_dir)) fs::dir_create(log_dir)
+log_appender(appender_tee(tempfile(paste0("plumber_", Sys.time(), "_"), log_dir, ".log")))
+
+convert_empty <- function(string) {
+  if (string == "") {
+    return("-")
+  }
+  return(string)
+}
+
+pre_route_logging <- function(req) {
+  tictoc::tic(msg = req$PATH_INFO)
+}
+
+post_route_logging <- function(req, res) {
+  end <- tictoc::toc(quiet = TRUE) # nolint
+  log_info('{convert_empty(req$REMOTE_ADDR)} "{convert_empty(req$HTTP_USER_AGENT)}" {convert_empty(req$HTTP_HOST)} {convert_empty(req$REQUEST_METHOD)} {convert_empty(end$msg)} {convert_empty(res$status)} {round(end$toc - end$tic, digits = getOption("digits", 5))}') # nolint
+}
+```
+
+To capture log from the request, we use custom preroute and postroute hooks in Rplumber. If you take a look in that code, in `pre_route_logging` and `post_route_logging` function, we capture anything from the request, such as request method, user-agent, response status, and calculate the time to complete the request. Let's add this to the `app.R` 
+
+```diff
+# app.R
+
+library(plumber)
+
+# load required helpers
++source("./helpers/logging.R")
+
+# App initialization and settings for warning, trailing slash
+app <- pr()
+options(warn = -1)
+options_plumber(trailingSlash = TRUE)
+
+# Plumbber settings
++app %>%
++  pr_hooks(list(preroute = pre_route_logging, postroute = post_route_logging))
+
+# Simple Routes
+app %>%
+  pr_get("/", function(req, res){
++     log_warn("CUSTOM WARNING...")
+      return(list(message = "Welcome R Services"))
+    }, serializer = plumber::serializer_unboxed_json()) %>%
+
+```
+
+> By loading a `*.R` files using the `source` function, we load it globally in Rsession. As a result, we can use the functions defined in that files as well as any functions that have been preloaded from a library, anywhere in the app. This is due to the fact that this project is being run within a single R session.
+
+Restart and try send request to API, and you get this nice logs, also you get the logs output in a file.
+
+```
+Running plumber API at http://127.0.0.1:8000
+Running swagger Docs at http://127.0.0.1:8000/__docs__/
+WARN [2023-04-15 09:04:07] CUSTOM WARNING...
+INFO [2023-04-15 09:04:07] 172.20.0.1 "curl/8.0.1" localhost:8000 GET / 200 0.026
+WARN [2023-04-15 09:04:09] CUSTOM WARNING...
+INFO [2023-04-15 09:04:09] 172.20.0.1 "curl/8.0.1" localhost:8000 GET / 200 0.047
+```
+
+We can use function like `log_warn`, `log_error`, and any other functions provided by [`logger`](https://www.rdocumentation.org/packages/logger/versions/0.2.2) package anywhere in the apps, such as checking the function error, debugging value, and more.
+
+## Error Handling
+
+By default, all errors will be treated equally in Rplumber. Whenever a `stop` condition is called, Rplumber will return `500` error code and the message. But we know, not everything must be `500`, we must give the proper http response code to the client for each request, such as `400` error code for validation error, `404` when the resources is not found, or `418` if you're a teapot 😄.
+
+In this tutorial, we will be using signal condition to raise an error, and give a better response to client. For more detailed information you can refer to the [Unconstant Conjuction Blog](https://unconj.ca/blog/structured-errors-in-plumber-apis.html).
+
+Let's create `helpers/error.R` and add the code below
+
+```r
+# helpers/error.R
+
+api_error <- function(message, status) {
+    err <- structure(
+        list(message = message, status = status),
+        class = c("api_error", "error", "condition")
+    )
+    signalCondition(err)
+}
+
+error_handler <- function(req, res, err) {
+    if (!inherits(err, "api_error")) {
+        log_error("500 {convert_empty(err$message)}") # nolint
+        res$status <- 500
+        body <- list(
+            code = 500,
+            message = "Internal server error"
+        )
+    } else {
+        log_error("{err$status} {convert_empty(err$message)}") # nolint
+        res$status <- err$status
+        body <- list(
+            code = err$status,
+            message = err$message
+        )
+    }
+}
+```
+
+In `api_error` function, we create an object with `structure`, which is then filterd in `error_handler` hooks. These hooks are used to return a custom response to the client, which can be combined with logger we created earlier. Finally add the error handler hooks to `app.R` and we will create some examples of their usage.
+
+```diff
+# app.R
+
+# .....
+
+# load required helpers
++source("./helpers/error.R")
+source("./helpers/logging.R")
+
+# .....
+
+# Plumbber settings
+app %>%
++  pr_set_error(error_handler) %>%
+   pr_hooks(list(preroute = pre_route_logging, postroute = post_route_logging))
+
+# .....
+
+# Simple Routes
+app %>%
+   pr_get("/", function(req, res){
+     log_warn("CUSTOM WARNING...")
+     return(list(message = "Welcome R Services"))
+-  }, serializer = plumber::serializer_unboxed_json())
++  }, serializer = plumber::serializer_unboxed_json()) %>%
++  pr_get("/error", function(req, res){
++    log_error("CUSTOM ERROR LOG...")
++    api_error("ERROR MESSAGE FROM HELPERS", 400)
++  }, serializer = plumber::serializer_unboxed_json()) %>%
++  pr_get("/default-error", function(req, res){
++     stop("DEFAULT ERROR")
++  }, serializer = plumber::serializer_unboxed_json())
+```
+
+Now let's try to send GET request to `/error` and `/default-error`, and you got this error response
+
+```bash
+$ curl -s -X GET localhost:8000/error | jq
+{
+  "code": 400,
+  "message": "ERROR MESSAGE FROM HELPERS"
+}
+```
+
+```bash
+$ curl -s -X GET localhost:8000/default-error | jq
+{
+  "code": 500,
+  "message": "Internal server error"
+}
+```
+
+Errors resulting from `stop` condition are returned to client with a default `500` error code. However, errors from the `api_error` function will be returned with custom error message and appropriate error code. By using a `try-catch` block, we can `catch` any errors and run the `api_error` function instead of the default `stop` condition. We need to do this if you using an external library, because some function from a library raise an error using stop condition.
+
+To make it better, we can create additional function in `helpers/error.R` and use it anywhere just like `api_error` function, in example
+
+```r
+# helpers/error.R
+
+# rest of code
+
+bad_request <- function(message = "Somethings wrong") {
+    return(api_error(message = message, status = 400))
+}
+
+not_found <- function(message = "Resource Not Found") {
+    return(api_error(message = message, status = 404))
+}
+```
+
+With this, we can create more readable and consist code.
+
+## Next Part
+
+I thinks this post is too long, we will discussed on the routing and validation aspect in the upcoming post available at [here](./rest-api-with-r-part-2). Please stay tuned.
