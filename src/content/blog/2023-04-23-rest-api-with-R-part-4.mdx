@@ -1,0 +1,186 @@
+---
+title: "Rplumber, Built REST API with R Part 4: Testing and CI / CD"
+description: Develop REST API with R using Rplumber, from hello world, logging, error handler, request validation, to deploy with docker
+tags: ["Rlang", "tutorial", "API"]
+date: "2023-04-23"
+---
+
+## Previous Part
+
+We continue our discussion on how to develop rest API in R with Rplumber. This post is about testing our API. Before we continue, if you wanna read the other posts, you can check this links below.
+
+ - [Part 1 : Project Setup, Logging, and Error Handling](./rest-api-with-r-part-1) 
+ - [Part 2 : Routing and Request Validation](./rest-api-with-r-part-2)
+ - [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
+ - Part 4 : Testing and CI / CD 🚀 
+
+> TL:DR, If you wanna grab the code, it is available on [this repo 🚀 ](https://github.com/JfrAziz/r-plumber). This is the final version from this tutorial, If you have any issues in the code, feel free to return to this page for reference
+
+## Testthat & Setup The Environment
+
+The goals of testing in software development is to ensure our software meets the requirements and works as expected. In R we can use `testthat` package to test our apps. Testthat is the most popular unit testing package for R and is used by thousands of CRAN packages. Testthat work very well when you setup your R project as "R project". But we know, we have another way to organize our project. To do so, we must set another approach to use `testthat` in the project. 
+
+Since our project is creating REST API, we need to start the API and then test it. Before we continue, we should update our dependencies by installing  `testthat` and `httr` packages. `testthat` for testing and `httr` for making a http request with R. To install in our machine, run this command in R console
+
+```r
+install.packages(c("testthat", "httr"))
+```
+
+And don't forget to update the `Dockerfile`.
+
+```docker
+RUN Rscript -e "pak::pkg_install(c('testthat', 'httr'))"
+```
+
+Suppose we have one container to run the API and another container to run the test. In that case, We can use docker-compose to manage both containers by creating docker-compose file as follows.
+
+```yaml
+# docker-compose.test.yaml
+version: '3'
+
+networks:
+  r-plumber-networks:
+    name: r-plumber-networks
+
+services:
+  api:
+    build: .
+    container_name: r-plumber
+    command: app.R
+    volumes:
+      - ./:/app
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+    networks:
+      - r-plumber-networks
+
+  test:
+    build: .
+    container_name: r-plumber-test
+    command: test.R
+    volumes:
+      - ./:/app
+    depends_on:
+      - api
+    environment:
+      - WAIT_TIME=5
+      - HOST=api
+      - PORT=8000
+    networks:
+      - r-plumber-networks
+```
+
+We create a `api` and `test` container, which use the same Docker image but have different command and some environment variables. `api` container will execute `app.R` and `test` container execute `test.R`. Then to make both containers can communicate each other, we connect them to a docker-network.
+
+Let's create `test.R` in root project directory and add the following code
+
+```r
+# test.R
+
+library(testthat)
+
+options(warn = -1)
+
+# Setup by starting APIs
+HOST <- Sys.getenv("HOST", "0.0.0.0")
+
+PORT <- strtoi(Sys.getenv("PORT", 8000))
+
+WAIT_TIME <- strtoi(Sys.getenv('WAIT_TIME', 5)) # second
+
+# wait until the API is running
+Sys.sleep(WAIT_TIME)
+
+test_dir('test', reporter = MultiReporter$new(c(
+  LocationReporter$new(), 
+  CheckReporter$new()
+)))
+```
+
+Just simple code to run any test file from `test` directory. To running both container, we can use this command
+
+```bash
+docker compose -f "docker-compose.test.yaml" up  --abort-on-container-exit --exit-code-from test --attach test
+```
+
+## Example
+
+To create a test case, create file in `test` directory with prefix `test-*.R`, for example `test-api-app.R`. Let's say we want to test `/health-check` endpoint, just to make sure that our apps is running. To test this endpoint, we send GET request to `/health-check` and expect the response code to be `200` and the response message to be "R service is Running". Here is an example of how the test should look like:
+
+```r
+# test/test-api-app.R
+
+test_that("GET /health-check : API is running", {
+  # Send API request
+  req <- httr::GET(paste0("http://", HOST), port = PORT, path = "/health-check")
+
+  # Check response
+  expect_equal(req$status_code, 200)
+
+  expect_equal(jsonlite::fromJSON(httr::content(req, 'text', "UTF-8"))$message, "R Service is running...")
+})
+```
+
+Then we create a new routes / endpoint in `routes/health-check.R` and add this simple code:
+
+```r
+# routes/health-check.R
+
+#* Check if the API is running
+#* @serializer unboxedJSON
+#* @get /
+function(req, res) {
+  return(list(message = "R Service is running..."))
+}
+```
+
+Run the test again with the command earlier, and we get something like this in docker logs.
+
+```
+r-plumber-test  | Start test: GET /health-check : API is running
+r-plumber-test  |   'test-api-app.R:6:3' [success]
+r-plumber-test  |   'test-api-app.R:8:3' [success]
+r-plumber-test  | End test: GET /health-check : API is running
+r-plumber-test  |
+r-plumber-test  | [ FAIL 0 | WARN 0 | SKIP 0 | PASS 2 ]
+```
+
+This means that our API has passed the test we created for it. For more examples, you can visit the [final repository on github](https://github.com/JfrAziz/r-plumber) of this project, where you will find additional tests such as unit test for validator function. And don't forget to read the `testthat` documentation 😉.
+
+## CI / CD
+
+CI/CD stands for Continuous Integration/Continuous Delivery (or Continuous Deployment), which is a set of tasks to automate the process of building, testing, and deploying software. One of the tasks in CI/CD process is automated testing that run in platform like github actions, gitlab runner, or any other CI/CD platforms as it helps ensure the changes are tested before they are released to users. Testing typically running automatically whenever new code is committed to the repository, like github or gitlab with some scripts.
+
+In this section, we will create a GitHub Actions script that automatically runs the test whenever changes are made to the repository. To do this, we need to create a `.github/workflows/test.yml` file and here that script looks like:
+
+```yaml
+name: Test
+on:
+  pull_request:
+  push: { branches: master }
+
+jobs:
+  test:
+    name: Run Test
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build container
+      run: docker compose build
+
+    - name: Run tests
+      run: docker compose -f "docker-compose.test.yaml" up  --abort-on-container-exit --exit-code-from test --attach test
+```
+
+Simple right? It is just a step-by-step of how the test is run. First, we check out the repository, build the Docker image, and then run the test using Docker Compose. The script is triggered whenever new changes to the code are committed to the repository's master branch or when a pull request is made to the master branch.
+
+Once the tests have passed, you can add additional CI/CD tasks, such as deploying the application or merging the branch from the pull request.
+
+## Next Part
+
+Testing is one of the important part when develop applications to ensure our software meets the requirements and works as expected. In this post, we continued our discussion on how to set up a test environment in our r-plumber project using Docker and created a simple CI/CD pipeline in GitHub Actions. In the next part, we continue to parallel processing and test the performance of our API. 
