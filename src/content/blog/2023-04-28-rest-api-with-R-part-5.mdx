@@ -1,0 +1,288 @@
+---
+title: "Rplumber, Built REST API with R Part 5: Parallel Processing and Performance"
+description: Develop REST API with R using Rplumber, from hello world, logging, error handler, request validation, to deploy with docker
+tags: ["Rlang", "tutorial", "API"]
+date: "2023-04-28"
+---
+
+## Previous Part
+
+This post is the last part on **Rplumber, Built REST API with R** series, and in this post we have discussion on how to make our API is running on parallel processing to process multiple request at a time API. Also we will test the performance of our API. Before we start to the tutorial, if you wanna read the other posts, you can follow the links below.
+
+- [Part 1 : Project Setup, Logging, and Error Handling](./rest-api-with-r-part-1)
+- [Part 2 : Routing and Request Validation](./rest-api-with-r-part-2)
+- [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
+- [Part 4 : Testing and CI / CD](./rest-api-with-r-part-4)
+- Part 5 : Parallel Processing and Performance 🚀
+
+> TL:DR, If you wanna grab the code, it is available on [this repo 🚀 ](https://github.com/JfrAziz/r-plumber). This is the final version from this tutorial, If you have any issues in the code, feel free to return to this page for reference
+
+## Parrallel Processing, Why?
+
+When you run your R code, it's executed within Rsession, which acts as the intermediary between your code and the R software. However, Rsession runs on a single sequential thread. This mean that each command is executed one after the other in a sequential manner, because R does not natively support parallel processing within a single Rsession.
+
+Unfortunately, this can be problematic when building REST APIs using Rplumber. For example we have an endpoint that requires long time to be completed. When the API still process that endpoint, the API can't process any incoming requests, and wait until the process is completed then process the next request. To address this, we need to find a way to can process many incoming request in parallel, so the API can continue processing incoming requests even while working on others.
+
+### Implementation
+
+It is possible to do parallel processing in R by using additional packages that allow for distributed processing across multiple threads or machines. In this case, we will use `future` and `promise` packages. That packages will handle parallel processing on something called workers. workers is another Rsession that can be use by main worker to execute R code. `future` use some strategies to run parallel processing, such as Sequential, Multisession, Multicore, and Cluster. . For more information on these strategies, you can visit [this link](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html). In our case, we will be using multisession strategy because it can run on any os including Windows, and any Rsession runs separately and does not use shared memory from main worker.
+
+![Parallel Processing](/assets/images/2023-04-28/1-parallel-processing.svg)
+
+> It's worth mentioning that if you're interested to know more about `future` and `promises` in Rplumber, you can refer to [this article](https://cran.r-project.org/web/packages/promises/vignettes/future_promise.html) or watch the video from Barret Schloerke, the maintainer of Rplumber, which can be found in [this link](https://posit.co/resources/videos/plumber-and-future-async-web-apis/).
+
+To get started, let's create another helpers file `helpers/parallel.R` and add this following code
+
+```r
+# helpers/parallel.R
+
+library(future)
+library(promises)
+
+WORKERS <- strtoi(Sys.getenv("WORKERS", 3))
+
+future::plan(future::multisession(workers = WORKERS))
+
+log_info(paste0("Plumber will use ", WORKERS, " workers"))
+```
+
+Let's now look at an example of how to use `future` and `promise` in actions. To run any block of code in parallel, it must be wrapped withing `future_promise` function. For example, We'll create a route file that includes endpoints for fast and slow process process, with and without `future` and `promises`.
+
+```r
+# routes/task.R
+
+#* fast endpoint without promise
+#* @serializer unboxedJSON
+#* @get /fast-without-promise
+function(req, res) {
+  return(list(message = "Fast without promise endpoint"))
+}
+
+#* fast endpoint with promise
+#* @serializer unboxedJSON
+#* @get /fast-with-promise
+function(req, res) {
+  future_promise({
+    return(list(message = "Fast with promise endpoint"))
+  })
+}
+
+#* slow endpoint without promise
+#* @serializer unboxedJSON
+#* @get /slow-without-promise
+function(req, res) {
+  Sys.sleep(10)
+  return(list(message = "Slow without promise endpoint"))
+}
+
+#* slow endpoint with promise
+#* @serializer unboxedJSON
+#* @get /slow-with-promise
+function(req, res) {
+  future_promise({
+    Sys.sleep(10)
+    return(list(message = "Slow with promise endpoint"))
+  })
+}
+```
+
+### Test The Parallel Processing
+
+Now to test the endpoint, I will create additional script in javascript. This test will run 2 request at a time, one for the fast endpoint and one for the slow endpoint, both with and without `promise`. Let's take a look in this example
+
+```js
+const sendTaskRequest = async endpoint => {
+  console.time(endpoint);
+
+  console.log(`[START] Send request to /task/${endpoint}/`);
+
+  await fetch(`http://localhost:8000/task/${endpoint}`).then(res => res.json());
+
+  console.timeEnd(endpoint);
+  console.log(`[END] Request completed to /task/${endpoint}`);
+};
+
+(async () => {
+  console.log("WITHOUT FUTURE PROMISE...");
+
+  await Promise.all([
+    sendTaskRequest("slow-without-promise"),
+    sendTaskRequest("fast-without-promise"),
+  ]);
+
+  console.log("\nWITH FUTURE PROMISE...");
+
+  await Promise.all([
+    sendTaskRequest("slow-with-promise"),
+    sendTaskRequest("fast-with-promise"),
+  ]);
+})();
+```
+
+That example will send a request to slow endpoint (which is just request with 10s waiting) followed the fast endpoint at the same time. When you run the script, it will output the following result.
+
+```
+WITHOUT FUTURE PROMISE...
+[START] Send request to /task/slow-without-promise/
+[START] Send request to /task/fast-without-promise/
+slow-without-promise: 10.086s
+[END] Request completed to /task/slow-without-promise
+fast-without-promise: 10.046s
+[END] Request completed to /task/fast-without-promise
+
+WITH FUTURE PROMISE...
+[START] Send request to /task/slow-with-promise/
+[START] Send request to /task/fast-with-promise/
+fast-with-promise: 179.181ms
+[END] Request completed to /task/fast-with-promise
+slow-with-promise: 10.151s
+[END] Request completed to /task/slow-with-promise
+```
+
+When we don't use `future` and `promises`, the fast endpoint will have to wait for the slow endpoint to finish, resulting in a 10-second delay for the fast endpoint. However, when we use `future` and `promises`, the fast endpoint will be processed immediately, even if the slow endpoint is coming first.
+
+Now that we have implemented parallel processing in Rplumber using `future` and `promises` packages, we can handle API endpoints that require long processing times more efficiently. For better result, it's recommended to wrap all endpoints with `future_promise` function, like the example that we created before. So any endpoint will processed in parallel.
+
+## Performance Testing
+
+This is not real performance testing, but we will compare a simple hello world from Rplumber API with another framework, I will choose Go with gin and Node.js with express. Comparing them can provide insights between different technologies in terms of development speed, scalability, and maintainability.
+
+We will compare a simple hello world API, to make sure the APIs are serving similar functions and to ensure that the comparison is fair and objective. Also all APIs will be running locally, to minimise network latency. And the testing will use [OHA](https://github.com/hatoo/oha) to test the speed and how much req / second can be processed.
+
+All the test will run with this command
+
+```bash
+oha -z 20s -c 20 --latency-correction --disable-keepalive <url>
+```
+
+### Rplumber
+
+Let's start with Rplumber test. For this test, I am using the folloowing code below, which is as simple ?hello world" with Rplumber like we created in part 1.
+
+```r
+library(plumber)
+
+# App initialization
+app <- pr()
+
+# redirect to slashed endpoint, /hello to /hello/
+options_plumber(trailingSlash = TRUE)
+
+app %>% pr_get("/", function(req, res){
+    return(list(
+      message = "Hello World"
+    ))
+  })
+
+# run plumber
+app %>%
+  pr_run(host = "0.0.0.0", port = 8001)
+```
+
+After runnung the test with OHA, we get the following result. Rplumber can handle just 1k request per second. Not bad, but if you compare to another framework it's different case.
+
+```
+Summary:
+  Success rate: 1.0000
+  Total:        20.0009 secs
+  Slowest:      0.0813 secs
+  Fastest:      0.0149 secs
+  Average:      0.0186 secs
+  Requests/sec: 1075.6003
+
+  Total data:   987.41 KiB
+  Size/request: 47 B
+  Size/sec:     49.37 KiB
+```
+
+### Node.js express
+
+Next we compare Rplumber with express.js. Express is one of the simpliest API framework in Node.js. Let's take a look to express code below
+
+```js
+const express = require("express");
+const app = express();
+const port = 4000;
+
+app.get("/", (req, res) => {
+  res.json({
+    message: "Hello World!",
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
+```
+
+Run the test and we get the follwong result below. Express can handle 6k request per second, 6x faster than Rplumber does.
+
+```
+Summary:
+  Success rate:	1.0000
+  Total:	20.0001 secs
+  Slowest:	0.0111 secs
+  Fastest:	0.0021 secs
+  Average:	0.0032 secs
+  Requests/sec:	6186.0612
+
+  Total data:	3.07 MiB
+  Size/request:	26 B
+  Size/sec:	157.07 KiB
+```
+
+### Go with Gin
+
+Go is a high-performance language that is often used for building APIs. In this test, we will compare Rplumber with Gin, a popular Go web framework. Below is the code used to create the simple "Hello World" API in Gin:
+
+```go
+package main
+
+import "github.com/gin-gonic/gin"
+
+func main() {
+	r := gin.Default()
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "Hello world",
+		})
+	})
+	r.Run()
+}
+```
+
+The test was run using OHA and the results show that Gin outperforms Rplumber, handling with 21k requests/second with average time is 0.0009 secs. What a fast language.
+
+```
+Summary:
+  Success rate: 1.0000
+  Total:        20.0007 secs
+  Slowest:      0.0229 secs
+  Fastest:      0.0001 secs
+  Average:      0.0009 secs
+  Requests/sec: 21044.8296
+
+  Total data:   10.04 MiB
+  Size/request: 25 B
+  Size/sec:     513.79 KiB
+```
+
+## Conclussion
+
+Rplumber can be a great solution for building REST APIs using R. However, to improve its functionality, it is essential to add basic features such as error handling, logging, and validationc. This tutorial gives you what you need.
+
+Rplumber is 'fast', it may not perform as well as other frameworks built in different languages such as Express.js and Gin. When considering which framework to use, it is also important to take into account the availability of libraries that support the framework for database connections, authentication, and community support.
+
+In my opinion, building API with Rplumber is best suited if your code has already written in R, for example **you have statistics model that has been created in R** or **you have package that implement any statistical computation with R** and **you want to make the API for it**, you can use Rplumber. However, if you want to create full API with authentication, database access with ORM, or other complex backend processes, it is not recommended to use Rplumber. Instead, it would be better to use a programming language such as Go, Node.js, Java, or Python.
+
+Another possible use case for Rplumber is to integrate it with an existing system. This can be achieved by creating an API gateway or using it as a microservice to handle specific tasks while building the backend with a more suitable programming language.
+
+## References
+
+These links help me a lot while writing this blog posts, check it may be you can get a new insight:
+
+- https://unconj.ca/blog/structured-errors-in-plumber-apis.html
+- https://cran.r-project.org/web/packages/promises/vignettes/future_promise.html
+- https://posit.co/resources/videos/plumber-and-future-async-web-apis
+- https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html
+-

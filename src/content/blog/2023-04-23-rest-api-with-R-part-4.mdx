@@ -9,18 +9,19 @@ date: "2023-04-23"
 
 We continue our discussion on how to develop rest API in R with Rplumber. This post is about testing our API. Before we continue, if you wanna read the other posts, you can check this links below.
 
- - [Part 1 : Project Setup, Logging, and Error Handling](./rest-api-with-r-part-1) 
- - [Part 2 : Routing and Request Validation](./rest-api-with-r-part-2)
- - [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
- - Part 4 : Testing and CI / CD 🚀 
+- [Part 1 : Project Setup, Logging, and Error Handling](./rest-api-with-r-part-1)
+- [Part 2 : Routing and Request Validation](./rest-api-with-r-part-2)
+- [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
+- Part 4 : Testing and CI / CD 🚀
+- [Part 5 : Parallel Processing and Performance](./rest-api-with-r-part-5)
 
 > TL:DR, If you wanna grab the code, it is available on [this repo 🚀 ](https://github.com/JfrAziz/r-plumber). This is the final version from this tutorial, If you have any issues in the code, feel free to return to this page for reference
 
 ## Testthat & Setup The Environment
 
-The goals of testing in software development is to ensure our software meets the requirements and works as expected. In R we can use `testthat` package to test our apps. Testthat is the most popular unit testing package for R and is used by thousands of CRAN packages. Testthat work very well when you setup your R project as "R project". But we know, we have another way to organize our project. To do so, we must set another approach to use `testthat` in the project. 
+The goals of testing in software development is to ensure our software meets the requirements and works as expected. In R we can use `testthat` package to test our apps. Testthat is the most popular unit testing package for R and is used by thousands of CRAN packages. Testthat work very well when you setup your R project as "R project". But we know, we have another way to organize our project. To do so, we must set another approach to use `testthat` in the project.
 
-Since our project is creating REST API, we need to start the API and then test it. Before we continue, we should update our dependencies by installing  `testthat` and `httr` packages. `testthat` for testing and `httr` for making a http request with R. To install in our machine, run this command in R console
+Since our project is creating REST API, we need to start the API and then test it. Before we continue, we should update our dependencies by installing `testthat` and `httr` packages. `testthat` for testing and `httr` for making a http request with R. To install in our machine, run this command in R console
 
 ```r
 install.packages(c("testthat", "httr"))
@@ -36,7 +37,7 @@ Suppose we have one container to run the API and another container to run the te
 
 ```yaml
 # docker-compose.test.yaml
-version: '3'
+version: "3"
 
 networks:
   r-plumber-networks:
@@ -93,7 +94,7 @@ WAIT_TIME <- strtoi(Sys.getenv('WAIT_TIME', 5)) # second
 Sys.sleep(WAIT_TIME)
 
 test_dir('test', reporter = MultiReporter$new(c(
-  LocationReporter$new(), 
+  LocationReporter$new(),
   CheckReporter$new()
 )))
 ```
@@ -167,14 +168,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Build container
-      run: docker compose build
+      - name: Build container
+        run: docker compose build
 
-    - name: Run tests
-      run: docker compose -f "docker-compose.test.yaml" up  --abort-on-container-exit --exit-code-from test --attach test
+      - name: Run tests
+        run: docker compose -f "docker-compose.test.yaml" up  --abort-on-container-exit --exit-code-from test --attach test
 ```
 
 Simple right? It is just a step-by-step of how the test is run. First, we check out the repository, build the Docker image, and then run the test using Docker Compose. The script is triggered whenever new changes to the code are committed to the repository's master branch or when a pull request is made to the master branch.
@@ -183,4 +184,4 @@ Once the tests have passed, you can add additional CI/CD tasks, such as deployin
 
 ## Next Part
 
-Testing is one of the important part when develop applications to ensure our software meets the requirements and works as expected. In this post, we continued our discussion on how to set up a test environment in our r-plumber project using Docker and created a simple CI/CD pipeline in GitHub Actions. In the next part, we continue to parallel processing and test the performance of our API. 
+Testing is one of the important part when develop applications to ensure our software meets the requirements and works as expected. In this post, we continued our discussion on how to set up a test environment in our r-plumber project using Docker and created a simple CI/CD pipeline in GitHub Actions. In the next part, we continue to parallel processing and test the performance of our API.
