@@ -5,14 +5,15 @@ tags: ["Rlang", "tutorial", "API"]
 date: "2023-04-15"
 ---
 
-If you have used R, you must heard about Rshiny. Rshiny is a good tool to build data driven interactive website, like dashboard or simulation tools with R. But, for some reasons Rshiny is not good idea to choose when you need to build a service where the users access it programatically, e.g API. We use the API in another system or apps, so we can integrate our existing system with R. In example, we have developed forecasting model with R and we want use it in our exsiting app, so we must develop API with R and not a full interactive apps like Rshiny does. 
+If you have used R, you must heard about Rshiny. Rshiny is a good tool to build data driven interactive website, like dashboard or simulation tools with R. But, for some reasons Rshiny is not good idea to choose when you need to build a service where the users access it programatically, e.g API. We use the API in another system or apps, so we can integrate our existing system with R. In example, we have developed forecasting model with R and we want use it in our exsiting app, so we must develop API with R and not a full interactive apps like Rshiny does.
 
 And here Rplumber comes in. Rplumber is library to make an API from R developed by Rstudio. In this post, we will talk about how to develop a API with Rplumber from routing, error handling, logging, request validation, to hosting it with docker. This tutorial comes with a few parts.
 
- - Part 1 : Project Setup, Logging, and Error Handling 🚀 
- - [Part 2 : Routing and Request Validation](./rest-api-with-r-part-2)
- - [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
- - [Part 4 : Testing and CI / CD](./rest-api-with-r-part-4)
+- Part 1 : Project Setup, Logging, and Error Handling 🚀
+- [Part 2 : Routing and Request Validation](./rest-api-with-r-part-2)
+- [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
+- [Part 4 : Testing and CI / CD](./rest-api-with-r-part-4)
+- [Part 5 : Parallel Processing and Performance](./rest-api-with-r-part-5)
 
 > Talk is cheap, show me the code
 
@@ -79,7 +80,7 @@ Running plumber API at http://127.0.0.1:8000
 Running swagger Docs at http://127.0.0.1:8000/__docs__/
 ```
 
-The plumber is running on [http://127.0.0.1:8000](http://127.0.0.1:8000) and Rplumber will generate [swagger docs](http://127.0.0.1:8000/__docs__/) automatically. 
+The plumber is running on [http://127.0.0.1:8000](http://127.0.0.1:8000) and Rplumber will generate [swagger docs](http://127.0.0.1:8000/__docs__/) automatically.
 
 ```bash
 $ curl -s -X GET localhost:8000 | jq
@@ -89,7 +90,6 @@ $ curl -s -X GET localhost:8000 | jq
 ```
 
 There it is, we just finnished the hello world 😄
-
 
 ## Logger
 
@@ -108,10 +108,10 @@ log_dir <- "logs"
 if (!fs::dir_exists(log_dir)) fs::dir_create(log_dir)
 log_appender(appender_tee(tempfile(paste0("plumber_", Sys.time(), "_"), log_dir, ".log")))
 
-convert_empty <- function(string) {
-  if (string == "") {
-    return("-")
-  }
+# transoform empty value to -
+convert_empty <- function(string = "") {
+  if (is.null(string)) return("-")
+  if (string == "") return("-")
   return(string)
 }
 
@@ -121,11 +121,20 @@ pre_route_logging <- function(req) {
 
 post_route_logging <- function(req, res) {
   end <- tictoc::toc(quiet = TRUE) # nolint
-  log_info('{convert_empty(req$REMOTE_ADDR)} "{convert_empty(req$HTTP_USER_AGENT)}" {convert_empty(req$HTTP_HOST)} {convert_empty(req$REQUEST_METHOD)} {convert_empty(end$msg)} {convert_empty(res$status)} {round(end$toc - end$tic, digits = getOption("digits", 5))}') # nolint
+  
+  log_info(sprintf('%s "%s" %s %s %s %s %s', 
+    convert_empty(req$REMOTE_ADDR),
+    convert_empty(req$HTTP_USER_AGENT),
+    convert_empty(req$HTTP_HOST),
+    convert_empty(req$REQUEST_METHOD),
+    convert_empty(end$msg),
+    convert_empty(res$status),
+    round(end$toc - end$tic, digits = getOption("digits", 5))
+  )) # nolint
 }
 ```
 
-To capture log from the request, we use custom preroute and postroute hooks in Rplumber. If you take a look in that code, in `pre_route_logging` and `post_route_logging` function, we capture anything from the request, such as request method, user-agent, response status, and calculate the time to complete the request. Let's add this to the `app.R` 
+To capture log from the request, we use custom preroute and postroute hooks in Rplumber. If you take a look in that code, in `pre_route_logging` and `post_route_logging` function, we capture anything from the request, such as request method, user-agent, response status, and calculate the time to complete the request. Let's add this to the `app.R`
 
 ```diff
 # app.R

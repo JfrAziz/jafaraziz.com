@@ -9,10 +9,11 @@ date: "2023-04-16"
 
 In our [previous post](./rest-api-with-r-part-1), we demonstrated how to create a custom logging and error handling system for a basic Rplumber app. In this post, we will delve into setting up a routing system and request validation. If you wanna check another part, please refer to the links below
 
- - [Part 1 : Project Setup, Logging, and Error Handling](./rest-api-with-r-part-1) 
- - Part 2 : Routing and Request Validation 🚀 
- - [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
- - [Part 4 : Testing and CI / CD](./rest-api-with-r-part-4)
+- [Part 1 : Project Setup, Logging, and Error Handling](./rest-api-with-r-part-1)
+- Part 2 : Routing and Request Validation 🚀
+- [Part 3 : Deploy with Docker](./rest-api-with-r-part-3)
+- [Part 4 : Testing and CI / CD](./rest-api-with-r-part-4)
+- [Part 5 : Parallel Processing and Performance](./rest-api-with-r-part-5)
 
 > Talk is cheap, show me the code
 
@@ -57,7 +58,7 @@ In the previous post, we have organize the project dir like this
 ├── docker-compose.yml
 ├── Dockerfile
 ├── helpers
-│   └── *.R
+│   └── *.R
 └── routes
     ├── route-A.R
     ├── route-B.R
@@ -80,7 +81,7 @@ for (file_name in r_routes_file_names) {
 
 Add this code to the `app.R` file. What that code doing is list all the files in routes dir including in the subdirectory. then mount it to current plumber with the file names represent the base route for all endpoints in the that file.
 
-- If we have route file called `route-A.R` and in that files we have `/` and `/hello` endpoint, the final endpoint will be `/route-A.R/` and `/route-A/hello` . 
+- If we have route file called `route-A.R` and in that files we have `/` and `/hello` endpoint, the final endpoint will be `/route-A.R/` and `/route-A/hello` .
 - Subdirectory with the same name to route files in base folder will be ignored. In example you have `./routes/subdir/route-A.R` and `./routes/subdir.R`, the `./routes/subdir/route-A.R` will be ignored because it will clash with the endpoint from `./routes/subdir.R`
 
 > Is up to you, to setup a new route, but be carefully don't use the same routes twice
@@ -108,21 +109,21 @@ Now to create a new routes or endpoints, just create files in `routes` dir with 
 
 ### Midleware of Filter
 
-Middleware or filter is a series of functions that are executed in order, with each function performing a specific task, such as check authentication, CORS filtering, logging, etc. Each function in the chain has access to the request and response objects, and can modify them as needed before passing them along to the next middleware or the controller. We can create global filter, like we do before when we add logging filter, or for a single routes. 
+Middleware or filter is a series of functions that are executed in order, with each function performing a specific task, such as check authentication, CORS filtering, logging, etc. Each function in the chain has access to the request and response objects, and can modify them as needed before passing them along to the next middleware or the controller. We can create global filter, like we do before when we add logging filter, or for a single routes.
 
 Let's say we want to add custom filter for `/custom-filter/enable` and `/custom-filter/enable/test` endpoints. First we create the routes file and add this annotation in to the routes files
 
 ```r
 # routes/custom-filter/enable.R
 
-#* Endpoint with custom filter enabled 
+#* Endpoint with custom filter enabled
 #* @serializer unboxedJSON
 #* @get /
 function(req, res) {
   return(list(message = "Custom Filter is enable in this endpoint"))
 }
 
-#* Another Endpoint with custom filter enabled 
+#* Another Endpoint with custom filter enabled
 #* @serializer unboxedJSON
 #* @get /test
 function(req, res) {
@@ -140,7 +141,7 @@ function(pr) {
 }
 ```
 
-Because we use `pr_mount` to load the routes file, each routes file will act as a different plumber, and with `#* @plumber` annotation, we can programatically add filter or another plumber config for each routes file. In this case we just log a simple message. 
+Because we use `pr_mount` to load the routes file, each routes file will act as a different plumber, and with `#* @plumber` annotation, we can programatically add filter or another plumber config for each routes file. In this case we just log a simple message.
 
 > When creating a filter / middleware function don't forget to forward it to another middleware or controller.
 
