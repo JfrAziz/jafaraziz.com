@@ -121,8 +121,8 @@ pre_route_logging <- function(req) {
 
 post_route_logging <- function(req, res) {
   end <- tictoc::toc(quiet = TRUE) # nolint
-  
-  log_info(sprintf('%s "%s" %s %s %s %s %s', 
+
+  log_info(sprintf('%s "%s" %s %s %s %s %s',
     convert_empty(req$REMOTE_ADDR),
     convert_empty(req$HTTP_USER_AGENT),
     convert_empty(req$HTTP_HOST),
