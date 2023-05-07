@@ -1,5 +1,6 @@
 ---
 import { SITE } from "config";
+import "@assets/styles/global.css";
 import type { LayoutProps } from "types";
 import { getOgImagePath } from "@utils/openGraph";
 
@@ -39,31 +40,7 @@ const fullTitle = `${title && `${title} - `}${SITE.title}`;
       content={description ?? SITE.description}
     />
 
-    <!-- PlusJakartaSans Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="preload"
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Plus+Jakarta+Sans:wght@400;800&display=swap"
-      as="style"
-    />
-
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Plus+Jakarta+Sans:wght@400;800&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <style>
-      body {
-        background-image: radial-gradient(
-            circle at 12.5px 12.5px,
-            lightgray 2%,
-            transparent 0%
-          ),
-          radial-gradient(circle at 37.5px 37.5px, lightgray 2%, transparent 0%);
-        background-size: 50px 50px;
-      }
-    </style>
+    <link rel="sitemap" href="/sitemap-index.xml">
   </head>
   <body class="bg-[#f2f2f2] selection:bg-gray-600 selection:text-white">
     <slot />
