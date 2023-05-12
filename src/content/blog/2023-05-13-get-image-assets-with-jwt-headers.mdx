@@ -1,0 +1,88 @@
+---
+title: "Get Images with JWT Authorization Headers for <img /> src"
+description: How to performa GET request to image assets in img src link from authorized URL with JWT authorization headers
+tags: ["javascript", "tips & trick"]
+date: "2023-05-13"
+---
+
+When we load an image using the `img` element, we do it like this:
+
+```html
+<img src="http://example.com/someimages.png" alt="Example Images" />
+```
+
+What happens if the URL `http://example.com/someimage.png` requires authenticated users to access it using authorization headers (JWT Token)? The image will not load because when we load images using the above example, we only send a simple GET HTTP request to the server. This means that the server will respond with a 401 or similar status code to indicate that the resource is not accessible because we didn't send an authenticated request using JWT. Sometimes, not all static assets are public assets.
+
+> I'm not talking about authentication with cookies here because cookies are always sent with every request. In contrast, a JWT token must be set in the Authorization header for every request.
+
+**Then, how we do it??**
+
+The solution is to use `fetch` with Authorization Headers to get the images, then transform it to `Base64` and display it using `img` tag. Let's take the example below, I am using vanilla JavaScript and HTML DOM.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <body>
+    <img id="image-with-jwt" src="" alt="" />
+    <script>
+      const getBase64Image = async res => {
+        const blob = await res.blob();
+
+        const reader = new FileReader();
+
+        await new Promise((resolve, reject) => {
+          reader.onload = resolve;
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        return reader.result;
+      };
+
+      fetch("http://example.com/authenticatedimages", {
+        headers: {
+          Authorization: "Bearer yourtoken",
+        },
+      })
+        .then(getBase64Image)
+        .then(imgString => {
+          document.getElementById("image-with-jwt").src = imgString;
+        });
+    </script>
+  </body>
+</html>
+```
+
+When you run that code, you can check if the `src` attributes in the `img` tags are `Base64` string instead of URL for the image. This solution also works in JavaScript framework, such as react. Here's the example code:
+
+```jsx
+const ImagesWithJWT = () => {
+  const [imagesString, setImagesString] = useState("");
+
+  const getBase64Image = async res => {
+    const blob = await res.blob();
+
+    const reader = new FileReader();
+
+    await new Promise((resolve, reject) => {
+      reader.onload = resolve;
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    return reader.result;
+  };
+
+  useEffect(() => {
+    fetch("http://example.com/authenticatedimages", {
+      headers: {
+        Authorization: "Bearer yourtoken",
+      },
+    })
+      .then(getBase64Image)
+      .then(imgString => setImagesString(imgString));
+  }, []);
+
+  return <img src={imagesString} />;
+};
+```
+
+Hope this helps
