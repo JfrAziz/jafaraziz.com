@@ -16,7 +16,7 @@ const posts = await getLatestPosts();
     <div class="space-y-4 md:space-y-6 py-4">
       <SectionHeader title="Topics" description="Explore any topics" />
       <div class="flex flex-wrap items-center">
-        {tags.map(tag => <Tag className="mb-2 mr-2" tag={tag} />)}
+        {tags.map(tag => <Tag className="mb-4 mr-2" tag={tag} />)}
       </div>
     </div>
     <BlogList posts={posts} />
