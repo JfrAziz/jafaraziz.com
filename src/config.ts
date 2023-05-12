@@ -4,7 +4,7 @@ export const SITE = {
   website: "https://jafaraziz.com",
   author: "Jafar Aziz",
   description:
-    "I am a web developer with a passion for creating websites and services. I am using a variety of tools in PHP, Node (Typescript), or Java (Kotlin), such as React/Next.js, Laravel, Spring Boot, and Express.js, to create websites or REST APIs. I have a deep interest in Linux and Docker stuff. Sometimes, I do scripting with Python, Node.js, or Bash to automate my works.",
+    "Welcome to my website! I am a web developer. My stack includes Typescript (React/Next.js & Express), Laravel, and Java (Kotlin). I have a deep interest in Linux and Docker. Sometimes, I do scripting with Python, Node.js, or Bash to automate my tasks.",
   title: "Jafar Aziz",
 };
 
