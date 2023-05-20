@@ -2,8 +2,7 @@ import mdx from "@astrojs/mdx";
 import preact from "@astrojs/preact";
 import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
-import { defineConfig } from "astro/config";
-import { sharpImageService } from "astro/assets";
+import { defineConfig, sharpImageService } from "astro/config";
 
 export default defineConfig({
   experimental: {
