@@ -40,14 +40,14 @@ export const getLatestPosts = async (count?: number) => {
 
 /**
  * get total posts
- * 
- * @returns 
+ *
+ * @returns
  */
-export const getTotalPosts = async () : Promise<number> => {
+export const getTotalPosts = async (): Promise<number> => {
   const blogs = await getCollection("blog");
 
-  return blogs.length
-}
+  return blogs.length;
+};
 
 /**
  * get all unique tags from all blog posts
