@@ -5,6 +5,7 @@ import tailwind from "@astrojs/tailwind";
 import { defineConfig, sharpImageService } from "astro/config";
 
 export default defineConfig({
+  compressHTML: true,
   experimental: {
     assets: true,
   },

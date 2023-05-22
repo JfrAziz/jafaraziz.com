@@ -29,6 +29,7 @@ const fullTitle = `${title && `${title} - `}${SITE.title}`;
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description ?? SITE.description} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={Astro.url.href} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
