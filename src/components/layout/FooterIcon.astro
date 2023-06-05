@@ -1,0 +1,16 @@
+---
+import Icon from "astro-icon";
+
+type name = "github" | "linkedin" | "twitter";
+
+interface Props {
+  name: name;
+  href: string;
+}
+
+const { name, href } = Astro.props;
+---
+
+<a href={href} referrerpolicy="no-referrer" target="_blank" title={name}>
+  <Icon class="w-4 font-bold" name={`simple-icons:${name}`} />
+</a>
