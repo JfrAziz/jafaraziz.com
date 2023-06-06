@@ -6,7 +6,7 @@ import Hero from "@components/layout/home/Hero.astro";
 import { getLatestPosts, getTotalPosts } from "@utils/blog";
 import SectionHeader from "@components/layout/content/SectionHeader";
 
-const posts = await getLatestPosts(5);
+const posts = await getLatestPosts(10);
 const totalPost = await getTotalPosts();
 ---
 
