@@ -1,0 +1,58 @@
+---
+title: "Create a type from object keys in typescript"
+description: How to create a typescript type based on the keys of an object
+tags: ["typescript", "javascript", "tips & trick"]
+date: "2023-07-31"
+---
+
+Let's get straight to the point! Imagine you have an object like this in TypeScript:
+
+```typescript
+export const charts = {
+  bar: BarChart,
+  pie: PieChart,
+  radar: RadarChart,
+  line: LineChart,
+  bump: BumpChart,
+  areabump: AreaBumpChart,f charts components!, so I can access it’s contents dy
+  radialbar: RadialBarChart,
+  heatmap: HeatMapChart,
+}
+```
+
+Now, you want to create a type based on the keys of this object, and here's how I do it:
+
+```typescript
+export type ChartType = keyof typeof charts
+              //^? type ChartType = "bar" | "pie" | "radar" | "line" | "bump" | "areabump" | "radialbar" | "heatmap"
+```
+
+But here's the catch: this method won't work if you define your object with a type annotation, like so:
+
+```typescript
+export const charts: Record<string, Chart> = {
+  bar: BarChart,
+  pie: PieChart,
+  radar: RadarChart,
+  line: LineChart,
+  bump: BumpChart,
+  areabump: AreaBumpChart,
+  radialbar: RadialBarChart,
+  heatmap: HeatMapChart,
+}
+
+export type ChartType = keyof typeof charts
+              //^? type ChartType = string
+```
+
+## Why I am doing this?? 🤔
+
+I want to create an object that's like a grand register of charts components!, so I can access it's contents dynamically simply by using 
+
+```typescript
+const type = "bar"
+
+const YourDynamicChart = charts[type]
+```
+
+I need to create a type for the `type` variable. And that's where the ChartType comes into play! It ensures that the type variable only holds valid chart types
