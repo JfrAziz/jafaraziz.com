@@ -14,7 +14,7 @@ export const charts = {
   radar: RadarChart,
   line: LineChart,
   bump: BumpChart,
-  areabump: AreaBumpChart,f charts components!, so I can access it’s contents dy
+  areabump: AreaBumpChart,
   radialbar: RadialBarChart,
   heatmap: HeatMapChart,
 }
@@ -23,8 +23,8 @@ export const charts = {
 Now, you want to create a type based on the keys of this object, and here's how I do it:
 
 ```typescript
-export type ChartType = keyof typeof charts
-              //^? type ChartType = "bar" | "pie" | "radar" | "line" | "bump" | "areabump" | "radialbar" | "heatmap"
+export type ChartType = keyof typeof charts;
+//^? type ChartType = "bar" | "pie" | "radar" | "line" | "bump" | "areabump" | "radialbar" | "heatmap"
 ```
 
 But here's the catch: this method won't work if you define your object with a type annotation, like so:
@@ -39,20 +39,20 @@ export const charts: Record<string, Chart> = {
   areabump: AreaBumpChart,
   radialbar: RadialBarChart,
   heatmap: HeatMapChart,
-}
+};
 
-export type ChartType = keyof typeof charts
-              //^? type ChartType = string
+export type ChartType = keyof typeof charts;
+//^? type ChartType = string
 ```
 
 ## Why I am doing this?? 🤔
 
-I want to create an object that's like a grand register of charts components!, so I can access it's contents dynamically simply by using 
+I want to create an object that's like a grand register of charts components!, so I can access it's contents dynamically simply by using
 
 ```typescript
-const type = "bar"
+const type = "bar";
 
-const YourDynamicChart = charts[type]
+const YourDynamicChart = charts[type];
 ```
 
 I need to create a type for the `type` variable. And that's where the ChartType comes into play! It ensures that the type variable only holds valid chart types
