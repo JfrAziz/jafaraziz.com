@@ -1,10 +1,10 @@
 ---
 import { Icon } from "astro-icon";
-import BlogItem from "@components/blog/BlogItem";
 import MainLayout from "@layouts/MainLayout.astro";
 import Hero from "@components/layout/home/Hero.astro";
+import BlogItem from "@components/blog/BlogItem.astro";
 import { getLatestPosts, getTotalPosts } from "@utils/blog";
-import SectionHeader from "@components/layout/content/SectionHeader";
+import SectionHeader from "@components/layout/content/SectionHeader.astro";
 
 const posts = await getLatestPosts(15);
 const totalPost = await getTotalPosts();

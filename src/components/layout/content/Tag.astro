@@ -1,0 +1,18 @@
+---
+interface Props {
+  tag: string;
+  className?: string;
+}
+
+const { tag, className } = Astro.props;
+---
+
+<a transition:name="tag" href={`/tags/${tag}`}>
+  <div class={`flex items-center ${className}`}>
+    <div
+      class="bg-gray-800 text-white text-xs font-bold font-mono py-0.5 px-2 cursor-pointer select-none"
+    >
+      {tag}
+    </div>
+  </div>
+</a>

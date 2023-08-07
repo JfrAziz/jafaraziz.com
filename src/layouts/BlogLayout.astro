@@ -2,12 +2,16 @@
 import type { LayoutProps } from "types";
 import MainLayout from "./MainLayout.astro";
 import Nav from "@components/layout/Nav.astro";
-import Tag from "@components/layout/content/Tag";
 import type { BlogFronmatter } from "content/_schemas";
+import Tag from "@components/layout/content/Tag.astro";
 
-export type Props = LayoutProps & BlogFronmatter;
+type BlogLayoutProps = LayoutProps & BlogFronmatter;
 
-const { title, date, tags } = Astro.props;
+interface Props extends BlogLayoutProps {
+  slug: string;
+}
+
+const { title, date, tags, slug } = Astro.props;
 ---
 
 <MainLayout {...Astro.props}>
@@ -25,6 +29,7 @@ const { title, date, tags } = Astro.props;
     </div>
     <div class="space-y-4">
       <h1
+        transition:name={slug}
         class="font-bold text-gray-700 text-2xl leading-relaxed lg:text-4xl lg:leading-tight"
       >
         {title}

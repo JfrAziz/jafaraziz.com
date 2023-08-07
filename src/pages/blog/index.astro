@@ -1,10 +1,10 @@
 ---
 import Nav from "@components/layout/Nav.astro";
-import Tag from "@components/layout/content/Tag";
-import BlogList from "@components/blog/BlogList";
 import MainLayout from "@layouts/MainLayout.astro";
+import BlogList from "@components/blog/BlogList.astro";
+import Tag from "@components/layout/content/Tag.astro";
 import { getAllTags, getLatestPosts } from "@utils/blog";
-import SectionHeader from "@components/layout/content/SectionHeader";
+import SectionHeader from "@components/layout/content/SectionHeader.astro";
 
 const tags = await getAllTags();
 const posts = await getLatestPosts();

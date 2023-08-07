@@ -1,0 +1,34 @@
+---
+import { getPostPath } from "@utils/blog";
+import type { BlogFronmatter } from "content/_schemas";
+import Tag from "@components/layout/content/Tag.astro";
+
+interface Props extends BlogFronmatter {
+  slug: string;
+}
+
+const { date, tags, title, slug } = Astro.props;
+---
+
+<li
+  transition:name={slug}
+  class="text-sm text-gray-700 flex flex-col-reverse items-start border-b border-gray-200 md:border-none md:flex-row md:items-center md:space-x-4"
+>
+  <div class="flex whitespace-nowrap space-x-4">
+    <div
+      class="select-none font-mono mb-1 px-2 bg-gray-800 text-white md:mb-0 md:px-0 md:bg-inherit md:text-gray-700"
+    >
+      {date.toISOString().split("T")[0]}
+    </div>
+    <div
+      class="select-none text-white text-xs font-bold min-w-max hidden md:flex md:items-center"
+    >
+      <Tag tag={tags[0] ?? "no tags"} />
+    </div>
+  </div>
+  <div
+    class="line-clamp-2 mb-2 md:line-clamp-1 md:mb-0 md:underline hover:cursor-pointer"
+  >
+    <a href={getPostPath(slug)}>{title}</a>
+  </div>
+</li>

@@ -1,0 +1,16 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<div
+  transition:name="section-header"
+  class="space-y-2 md:space-x-4 md:flex items-end"
+>
+  <div class="text-gray-800 font-extrabold text-3xl lg:text-4xl">{title}</div>
+  {description && <div class="text-gray-700">{description}</div>}
+</div>

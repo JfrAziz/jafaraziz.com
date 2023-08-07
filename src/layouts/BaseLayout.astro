@@ -3,6 +3,7 @@ import { SITE } from "config";
 import "@assets/styles/global.css";
 import type { LayoutProps } from "types";
 import { getOgImagePath } from "@utils/openGraph";
+import { ViewTransitions } from "astro:transitions";
 
 export interface Props extends LayoutProps {}
 
@@ -42,6 +43,8 @@ const fullTitle = `${title && `${title} - `}${SITE.title}`;
     />
 
     <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <ViewTransitions />
   </head>
   <body class="bg-[#f2f2f2] selection:bg-gray-600 selection:text-white">
     <slot />

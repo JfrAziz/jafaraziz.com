@@ -1,0 +1,18 @@
+---
+import BlogItem from "./BlogItem.astro";
+import type { CollectionEntry } from "astro:content";
+import SectionHeader from "@components/layout/content/SectionHeader.astro";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+}
+
+const { posts } = Astro.props;
+---
+
+<div class="space-y-6">
+  <SectionHeader title="Blog" description="Sorted by date" />
+  <ul class="space-y-5">
+    {posts.map(post => <BlogItem slug={post.slug} {...post.data} />)}
+  </ul>
+</div>

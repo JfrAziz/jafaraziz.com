@@ -8,6 +8,7 @@ export default defineConfig({
   compressHTML: true,
   experimental: {
     assets: true,
+    viewTransitions: true,
   },
   image: {
     service: sharpImageService(),
