@@ -39,7 +39,7 @@ function doPost(e) {
 
     /**
      * we get all headers value from `response` sheets,
-     * header must be in the first row and firs column
+     * header must be in the first row and first column
      * */
     const headers = sheet
       .getRange(1, 1, 1, sheet.getLastColumn())
@@ -57,12 +57,12 @@ function doPost(e) {
       switch (header) {
         case "no":
           return nextRow - 1;
-        casinsert the data to last rowe "date":
+        case "date":
           return new Date();
         default:
           return e.parameter[header];
       }
-    });`answer`
+    });
 
     /**
      * insert the data to last row
@@ -157,6 +157,8 @@ This method is not limited in HTML Form, you can do this in your backend or just
         /**
          * send data to web APP URL from
          * script deployment
+         *
+         * change the url to your URL, don't use this
          **/
         fetch(
           "https://script.google.com/macros/s/AKfycbw_jnqkYazOLr7ZExiD_IlgelGnICroO3yseuuW9jruJk0LAYZSK6JtxfDAhT_eta-f/exec",
