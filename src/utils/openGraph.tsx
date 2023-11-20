@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { SITE } from "config";
 import { readFile } from "node:fs/promises";
-import satori, { SatoriOptions } from "satori";
+import satori, { type SatoriOptions } from "satori";
 
 const BASE64_LOGO =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAFjSURBVHgB7ZY9TsNAEIXf2G6gygEIbIWSjgaSMtyAGwAnIJwg4QTACThCcgNcEtNQ2Sk3PoG7VGRYWwmy5Ni7kdayIvlr8rPPO0/2vPECLS0NQ6bCi/5gpj6usouYbuXyS+bXRW8omPgz/c4MP14uHk329WBOJ62j0WTrRFrdPw4apnEDhzyCQxDd3vWDTuQSJUYGVINNGDyCOcIh50OrUs2sNSD6gydVfArLqPg9qyT5lT1w1huOGHiDZVRcX2S0yPYtNZDm2nU2M9guDrzHYTDd/fbKimdDhakDu+XncRSM8/8U7oAQo852ognYRdL6tDAdCwb4ZF1P8XR8Sz9BlYHz/uAV23lvDeJk37ujYCDNuorGGJYhcGnxlKwJa816+P1TpfG6lzd3dWV9FQbafT3XBX55o313q9E6gXlz+vmsVxqQUTA3EaoDyT3sp6M9DxzRgYSZV0QkNbLdeoKWlmPhDzzzc3Jz944vAAAAAElFTkSuQmCC";

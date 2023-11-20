@@ -113,7 +113,7 @@ Next, we need to create a function that generates an SVG from the template using
 ```typescript
 import sharp from "sharp";
 import { readFile } from "node:fs/promises";
-import satori, { SatoriOptions } from "satori";
+import satori, { type SatoriOptions } from "satori";
 
 const generateOgImage = async (
   text: string = "Default Title",
@@ -159,7 +159,7 @@ Next, add a new route `/open-graph/[...slug].png` to our astro website by creati
 
 ```typescript
 import { getLatestPosts } from "@utils/blog";
-import generateOgImage from "@utils/openGraph";
+import generateOgImage, { type OgData } from "@utils/openGraph";
 import type { APIRoute, GetStaticPaths, GetStaticPathsItem } from "astro";
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -181,7 +181,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return result;
 };
 
-export const get: APIRoute = async ({ props }) => {
+export const GET: APIRoute<OgData> = async ({ props }) => {
   const response = await generateOgImage(props.title, props.date);
   return new Response(response, {
     status: 200,

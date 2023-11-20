@@ -1,7 +1,7 @@
-import generateOgImage, { OgData } from "@utils/openGraph";
-import type { APIRoute, GetStaticPaths, GetStaticPathsItem } from "astro";
-import { getAllTags, getLatestPosts, modifySlug } from "@utils/blog";
 import { SITE } from "config";
+import generateOgImage, { type OgData } from "@utils/openGraph";
+import { getAllTags, getLatestPosts, modifySlug } from "@utils/blog";
+import type { APIRoute, GetStaticPaths, GetStaticPathsItem } from "astro";
 
 interface StaticPaths extends OgData {
   slug: string;
@@ -63,7 +63,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return result;
 };
 
-export const get: APIRoute = async ({ props }) => {
+export const GET: APIRoute<OgData> = async ({ props }) => {
   const response = await generateOgImage(props.title, props.date);
   return new Response(response, {
     status: 200,
