@@ -1,18 +1,18 @@
 ---
-import Nav from "@components/layout/Nav.astro";
-import MainLayout from "@layouts/MainLayout.astro";
 import BlogList from "@components/blog/BlogList.astro";
-import Tag from "@components/layout/content/Tag.astro";
-import { getAllTags, getPostsByTag } from "@utils/blog";
+import Nav from "@components/layout/Nav.astro";
 import SectionHeader from "@components/layout/content/SectionHeader.astro";
+import TagC from "@components/layout/content/Tag.astro";
+import MainLayout from "@layouts/MainLayout.astro";
+import { getAllTags, getPostsByTag } from "@utils/blog";
 
 // static paths
 export async function getStaticPaths() {
-  let tags = await getAllTags();
-  return tags.map(tag => ({
-    params: { tag: tag },
-    props: { tag },
-  }));
+	let tags = await getAllTags();
+	return tags.map((tag) => ({
+		params: { tag: tag },
+		props: { tag },
+	}));
 }
 
 // astro pages
@@ -20,7 +20,7 @@ const { tag } = Astro.props;
 
 let tags = await getAllTags();
 
-tags = tags.filter(name => name !== tag);
+tags = tags.filter((name) => name !== tag);
 
 const posts = await getPostsByTag(tag);
 ---
@@ -31,7 +31,7 @@ const posts = await getPostsByTag(tag);
     <div class="space-y-4 md:space-y-6 py-4">
       <SectionHeader title={`Tag: "${tag}"`} />
       <div class="flex flex-wrap items-center">
-        {tags.map(tag => <Tag className="mb-4 mr-2" tag={tag} />)}
+        {tags.map(tag => <TagC class:list="mb-4 mr-2" tag={tag} />)}
       </div>
     </div>
     <BlogList posts={posts} />

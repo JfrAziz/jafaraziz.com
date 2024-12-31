@@ -15,7 +15,7 @@ First, create a new blank Google Spreadsheets. Don't forget to keep your spreads
 https://docs.google.com/spreadsheets/d/[spreadsheet_id]/edit#gid=0
 ```
 
-![Blank Spreadsheet](/assets/images/2023-09-03/1-blank-spreadsheet.png)
+![Blank Spreadsheet](@assets/images/2023-09-03/1-blank-spreadsheet.png)
 
 Now open `Extensions` `App Script`, and paste the following code to the editor, don't forget to change the `spreadsheet_id`
 
@@ -89,7 +89,7 @@ function doPost(e) {
 
 We will use the first row from `response` sheets to define our form keys/columns:
 
-![Spreadsheet Header](/assets/images/2023-09-03/2-header-row.png)
+![Spreadsheet Header](@assets/images/2023-09-03/2-header-row.png)
 
 In this case, your keys are `name`, `email`, and `question`. be carefull, because this keys are case-sensitive.
 
@@ -100,11 +100,11 @@ Back to the App Script, to get url to submit the form, we need to create a new d
 - Execute As `Me`
 - Who has access `Anyone` (Everyone can submit the form)
 
-![Deploy Script](/assets/images/2023-09-03/3-deploy-script.png)
+![Deploy Script](@assets/images/2023-09-03/3-deploy-script.png)
 
 `Deploy` and now you get the Web App URL. keep it, we will use this URL to submit our form later.
 
-![Deploy URL](/assets/images/2023-09-03/4-deploy-url.png)
+![Deploy URL](@assets/images/2023-09-03/4-deploy-url.png)
 
 > If you update your script, try to redeploy again.
 
@@ -177,11 +177,11 @@ This method is not limited in HTML Form, you can do this in your backend or just
 </html>
 ```
 
-![Simple Form](/assets/images/2023-09-03/5-simple-form.png)
+![Simple Form](@assets/images/2023-09-03/5-simple-form.png)
 
 Submit, and now you can see the data is coming in your spreadsheets.
 
-![Simple Form](/assets/images/2023-09-03/6-form-response.png)
+![Simple Form](@assets/images/2023-09-03/6-form-response.png)
 
 ## Wrapping Up
 

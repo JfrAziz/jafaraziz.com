@@ -7,7 +7,7 @@ date: "2023-03-16"
 
 OpenGraph images are used to enhance the appearance and shareability of website content when shared on social media platforms, like [twitter](https://twitter.com/jfrAziz), facebook, etc. OpenGraph images serve as a thumbnail of the website link that provides users with an idea of what the link is about before they click on it. It is possible to use any image as an OpenGraph image, and in some cases, it can even be generated automatically from the page's content.
 
-![Opengraph Example in Twitter](/assets/images/2023-03-16/1-opengraph-example-in-twitter.png)
+![Opengraph Example in Twitter](@assets/images/2023-03-16/1-opengraph-example-in-twitter.png)
 
 Astro is fantasitic framework for building 'low interaction' website such as blog, news, and more. Astro comes with many integration to frontend library, like react, preact, vue, solid, svelte, and more. I write this blog with astro, and it is easy and fast. One important aspect of creating blog content is ensuring that it is shareable on social media platforms. This is where OpenGraph images come into play. I have generated OpenGraph images for any pages in this blog. I am using Satori from Vercel to generete opengraph images base on the content of the page. Satori is library to convert HTML and CSS to SVG. Combined with astro routing, we can generate OpenGraph images as much as we want.
 
@@ -106,7 +106,7 @@ const Template = (props: OgData) => (
 
 This template takes two props, "title" and "date", and generates an image similar to the example shown.
 
-![Opengraph Example](/assets/images/2023-03-16/2-opengraph-example.png)
+![Opengraph Example](@assets/images/2023-03-16/2-opengraph-example.png)
 
 Next, we need to create a function that generates an SVG from the template using Satori options such as fonts, image size, and others. Once the SVG has been generated, we can convert it to a buffer using the Sharp package. With sharp, buffer from svg will became a png.
 

@@ -7,19 +7,19 @@ date: "2023-03-28"
 
 QGIS is free and open source Geographic Information System (GIS) software. It is designed to allow users to view, edit, and analyze geospatial data. Today, I will show you how to find the nearest feature in other layers, and draw the line to connect to the features. For example, I am using earthquake and volcanos data in Sumatera, Indonesia, you can download it [here](https://gist.github.com/JfrAziz/b66a3a76baff50d25f450899527ee524). You can use other data, and the process remains the same.
 
-![Earthquake and Volcanos data](/assets/images/2023-03-28/1-earthquake-and-volcanos-data.png)
+![Earthquake and Volcanos data](@assets/images/2023-03-28/1-earthquake-and-volcanos-data.png)
 
 The red triangle represents volcanos in Indonesia, and the green dot represents earthquake. I want to find what the nearest volcano to any earthquake. Before we get started, make sure you have activated Processing Toolbox Plugins, go to `Plugins -> Manage and Install Plugins` and check `Processing` plugin. Then, go to `Processing -> Toolbox` to open the Toolbox window, and search for `Join attributes by nearest`.
 
-![Processing Toolbox Window](/assets/images/2023-03-28/2-processing-toolbox-window.png)
+![Processing Toolbox Window](@assets/images/2023-03-28/2-processing-toolbox-window.png)
 
 Fill input layer 1 with Earthquake data and input layer 2 with Volcano data. In this window, you can also set the maximum distance and the max number of nearest neighbors.
 
-![Join Attributes By Nearest Window](/assets/images/2023-03-28/3-join-attributes-by-nearest-window.png)
+![Join Attributes By Nearest Window](@assets/images/2023-03-28/3-join-attributes-by-nearest-window.png)
 
 Click run and the process is completed. Now, we have a new layes named `joined layer`. Open the attribute tables from `joined layer`, and you might notice new columns in our `earthquake` data, such as volcano name, the coordinate where the nearest point is located, and the distance betwen the earthquake and the nearest volcano. For instance, the first row of the table shows that the Bukit Daun Volcano is the closest volcano with a distance of 0.77 degree to the first earthquake data on the table.
 
-![Joined Layer Attributes Table](/assets/images/2023-03-28/4-joined-layer-attributes-table.png)
+![Joined Layer Attributes Table](@assets/images/2023-03-28/4-joined-layer-attributes-table.png)
 
 Finally, to draw the line from earthquake data to the nearest volcano, we use the `joined layer` and open properties menu. Go to `Symbology` and add a new marker. Change the symbol type to `Geometry Generator` and `LineString/MultiLineString` geometry type. In the text field, add this line to draw the line from the current coordinates to `nearest_x` and `nearest_y` that we created in the process earlier:
 
@@ -27,10 +27,10 @@ Finally, to draw the line from earthquake data to the nearest volcano, we use th
 MAKE_LINE($geometry, MAKE_POINT("nearest_x", "nearest_y"))
 ```
 
-![Joined Layer Geometry Generator Symbol](/assets/images/2023-03-28/5-joined-layer-geometry-generator-symbol.png)
+![Joined Layer Geometry Generator Symbol](@assets/images/2023-03-28/5-joined-layer-geometry-generator-symbol.png)
 
 Apply and now you can see the line from any earthquake to it's nearest volcano.
 
-![Final Result of Drawing Line](/assets/images/2023-03-28/6-final-result-of-drawing-line.png)
+![Final Result of Drawing Line](@assets/images/2023-03-28/6-final-result-of-drawing-line.png)
 
 Simple isn't it, it's because QGIS has many built-in tools to process geospatial data, including finding the nearest point from any features.

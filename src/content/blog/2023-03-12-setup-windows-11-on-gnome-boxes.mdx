@@ -28,15 +28,15 @@ Before we begin on the installation process, make sure you have met the followin
 
 Create a new box and select your Windows 11 ISO files, then you face this window to setup disk, ram, and EFI support for VM.
 
-![Setup Disk, RAM, and EFI Support](/assets/images/2023-03-12/1-setup-disk-ram-and-efi-support.png)
+![Setup Disk, RAM, and EFI Support](@assets/images/2023-03-12/1-setup-disk-ram-and-efi-support.png)
 
 I am using 4 GB RAM and 40 GB disk storage. Click on the create button, and your virtual machine will start running. When your VM running for the first time, just back and select force shutdowns your VM since we haven't made any modifications to the TPM and UEFI configurations yet. You got this error message when continue to install btw.
 
-![This PC Can't Run Windows 11](/assets/images/2023-03-12/2-this-pc-cannot-run-windows-11-error.png)
+![This PC Can't Run Windows 11](@assets/images/2023-03-12/2-this-pc-cannot-run-windows-11-error.png)
 
 To access the VM configuration file, simply right-click on your box and select "Preferences". From there, you can edit the configuration, and the VM config file will appear in your favorite text editor.
 
-![Setup Disk, RAM, and EFI Support](/assets/images/2023-03-12/3-edit-vm-configuration.png)
+![Setup Disk, RAM, and EFI Support](@assets/images/2023-03-12/3-edit-vm-configuration.png)
 
 We will edit some config files to add support to UEFI and TPM 2.0
 
@@ -66,11 +66,11 @@ We will edit some config files to add support to UEFI and TPM 2.0
 
 Save the config and run your VM again. For some case, boxes not loading your ISO and show the screen like this:
 
-![Iso not loaded](/assets/images/2023-03-12/4-iso-not-loaded.png)
+![Iso not loaded](@assets/images/2023-03-12/4-iso-not-loaded.png)
 
 Just type `exit` and you will enter UEFI settings. from there, you can use Boot Manager and select from DVD to load Windows 11 ISO, and you can continue the rest Windows 11 installation without error before.
 
-![Installation Started](/assets/images/2023-03-12/5-windows-installation-started.png)
+![Installation Started](@assets/images/2023-03-12/5-windows-installation-started.png)
 
 ## Conclusion
 

@@ -1,17 +1,16 @@
 ---
+import Tag from "@components/layout/content/Tag.astro";
 import { getPostPath } from "@utils/blog";
 import type { BlogFronmatter } from "content/_schemas";
-import Tag from "@components/layout/content/Tag.astro";
 
 interface Props extends BlogFronmatter {
-  slug: string;
+	slug: string;
 }
 
 const { date, tags, title, slug } = Astro.props;
 ---
 
 <li
-  transition:name={slug}
   class="text-sm text-gray-700 flex flex-col-reverse items-start border-b border-gray-200 md:border-none md:flex-row md:items-center md:space-x-4"
 >
   <div class="flex whitespace-nowrap space-x-4">

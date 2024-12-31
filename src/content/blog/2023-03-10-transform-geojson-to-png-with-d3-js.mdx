@@ -5,13 +5,13 @@ tags: ["datavizs", "javascript", "maps"]
 date: "2023-03-10"
 ---
 
-![900kb geojson to 30kb png](/assets/images/2023-03-10/1-900kb-geojson-to-30kb-png.png)
+![900kb geojson to 30kb png](@assets/images/2023-03-10/1-900kb-geojson-to-30kb-png.png)
 
 ## Introduction
 
 I have project to show thumbnail of maps from a hundreds GeoJSON files, and this is not efficient if we send geoJSON data to our client (web apps in this case). GeoJSON has a bigger size than png image in small resolution, especially for GeoJSON that has some detailed information.
 
-![real case when this method is used](/assets/images/2023-03-10/2-real-case-when-this-method-is-used.png)
+![real case when this method is used](@assets/images/2023-03-10/2-real-case-when-this-method-is-used.png)
 
 We generate images from GeoJSON files on the server and send it to the client. This method makes more sense if you want to show a lot of maps without interaction, like thumbnail.
 
@@ -147,7 +147,7 @@ To generate multiple GeoJSON files, just create script to run the function autom
 
 Sometimes you can't get best result when generating image from GeoJSON. In my case, D3 can't render some specific GeoJSON features that too small to render, and I must search and remove manually (using QGIS) that specific features.
 
-![example when this method give bad result](/assets/images/2023-03-10/3-example-when-this-method-give-bad-result.png)
+![example when this method give bad result](@assets/images/2023-03-10/3-example-when-this-method-give-bad-result.png)
 
 In my example, I want to make continent images from geoJSON. You can see, Affrica does not exist, so I edited to remove some fetures with QGIS and run the script again and I get the best result. The trickiest part is find the feature that cause this happen, sometimes I export to svg to find that features.
 

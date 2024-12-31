@@ -3,11 +3,11 @@ import BlogLayout from "@layouts/BlogLayout.astro";
 import { getLatestPosts, modifySlug } from "@utils/blog";
 
 export async function getStaticPaths() {
-  const blogs = await getLatestPosts();
-  return blogs.map(entry => ({
-    params: { slug: modifySlug(entry.slug) }, // modify the default generated slug from astro-content
-    props: { entry },
-  }));
+	const blogs = await getLatestPosts();
+	return blogs.map((entry) => ({
+		params: { slug: modifySlug(entry.slug) }, // modify the default generated slug from astro-content
+		props: { entry },
+	}));
 }
 
 const { entry } = Astro.props;
@@ -15,6 +15,6 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 ---
 
-<BlogLayout {...entry.data}>
+<BlogLayout {...entry.data} slug={entry.slug}>
   <Content />
 </BlogLayout>

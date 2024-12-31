@@ -1,10 +1,10 @@
 ---
-import Logo from "./Logo";
-import Icon from "astro-icon";
+import { Icon } from "astro-icon/components";
 import type { Collection } from "types";
+import Logo from "./Logo.astro";
 
 interface Props {
-  subitem?: Collection;
+	subitem?: Collection;
 }
 
 const { subitem } = Astro.props;

@@ -1,41 +1,11 @@
-@font-face {
-  font-display: swap;
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 400;
-  src: url("/fonts/jetbrains-mono-v17-latin-regular.woff2") format("woff2");
-}
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-@font-face {
-  font-display: swap;
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 800;
-  src: url("/fonts/jetbrains-mono-v17-latin-800.woff2") format("woff2");
-}
+@theme {
+	--font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui,
+		sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+		"Noto Color Emoji";
 
-@font-face {
-  font-display: swap;
-  font-family: "Plus Jakarta Sans";
-  font-style: normal;
-  font-weight: 400;
-  src: url("/fonts/plus-jakarta-sans-v7-latin-regular.woff2") format("woff2");
-}
-
-@font-face {
-  font-display: swap;
-  font-family: "Plus Jakarta Sans";
-  font-style: normal;
-  font-weight: 800;
-  src: url("/fonts/plus-jakarta-sans-v7-latin-800.woff2") format("woff2");
-}
-
-body {
-  background-image: radial-gradient(
-      circle at 12.5px 12.5px,
-      lightgray 2%,
-      transparent 0%
-    ),
-    radial-gradient(circle at 37.5px 37.5px, lightgray 2%, transparent 0%);
-  background-size: 50px 50px;
+	--font-mono: "JetBrains Mono Variable", ui-sans-serif, system-ui, sans-serif,
+		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }

@@ -1,0 +1,21 @@
+---
+import { SOCIALS } from "config";
+---
+
+<span>
+  {
+    SOCIALS.map((item, i) => (
+      <span>
+        {i > 0 && (i === SOCIALS.length - 1 ? " or " : ", ")}
+        <a
+          href={item.href}
+          target="_blank"
+          class="font-mono text-sm"
+          referrerpolicy="no-referrer"
+        >
+          {item.name}
+        </a>
+      </span>
+    ))
+  }
+</span>

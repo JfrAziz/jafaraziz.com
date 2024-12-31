@@ -29,13 +29,13 @@ export const getPostPath = (slug: string) => `/blog/${modifySlug(slug)}`;
  * @returns
  */
 export const getLatestPosts = async (count?: number) => {
-  const blogs = await getCollection("blog");
+	const blogs = await getCollection("blog");
 
-  blogs.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+	blogs.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-  if (!count) return blogs;
+	if (!count) return blogs;
 
-  return blogs.slice(0, count);
+	return blogs.slice(0, count);
 };
 
 /**
@@ -44,9 +44,9 @@ export const getLatestPosts = async (count?: number) => {
  * @returns
  */
 export const getTotalPosts = async (): Promise<number> => {
-  const blogs = await getCollection("blog");
+	const blogs = await getCollection("blog");
 
-  return blogs.length;
+	return blogs.length;
 };
 
 /**
@@ -55,13 +55,13 @@ export const getTotalPosts = async (): Promise<number> => {
  * @returns string[]
  */
 export const getAllTags = async () => {
-  const tags = new Set<string>();
+	const tags = new Set<string>();
 
-  const blogs = await getLatestPosts();
+	const blogs = await getLatestPosts();
 
-  blogs.forEach(blog => blog.data.tags.forEach(tag => tags.add(tag)));
+	blogs.forEach((blog) => blog.data.tags.forEach((tag) => tags.add(tag)));
 
-  return [...tags].sort();
+	return [...tags].sort();
 };
 
 /**
@@ -73,11 +73,11 @@ export const getAllTags = async () => {
  * @returns
  */
 export const getPostsByTag = async (tag: string, count?: number) => {
-  const blogs = await getLatestPosts();
+	const blogs = await getLatestPosts();
 
-  const filtered = blogs.filter(blog => blog.data.tags.includes(tag));
+	const filtered = blogs.filter((blog) => blog.data.tags.includes(tag));
 
-  if (!filtered) return blogs;
+	if (!filtered) return blogs;
 
-  return filtered.slice(0, count);
+	return filtered.slice(0, count);
 };

@@ -1,32 +1,28 @@
 import mdx from "@astrojs/mdx";
-import preact from "@astrojs/preact";
 import sitemap from "@astrojs/sitemap";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from "@tailwindcss/vite";
+import icon from "astro-icon";
 import { defineConfig, sharpImageService } from "astro/config";
 
 export default defineConfig({
-  compressHTML: true,
-  image: {
-    service: sharpImageService(),
-  },
-  site: "https://jafaraziz.com",
-  markdown: {
-    gfm: true,
-    shikiConfig: {
-      theme: "github-light",
-    },
-  },
-  integrations: [
-    tailwind(),
-    mdx({
-      syntaxHighlight: "shiki",
-      shikiConfig: {
-        theme: "github-light",
-      },
-    }),
-    sitemap(),
-    preact({
-      compat: true,
-    }),
-  ],
+	vite: { plugins: [tailwindcss()] },
+	compressHTML: true,
+	image: {
+		service: sharpImageService(),
+	},
+	site: "https://jafaraziz.com",
+	markdown: {
+		gfm: true,
+		shikiConfig: {
+			theme: "github-light",
+		},
+	},
+	integrations: [
+		icon(),
+		sitemap(),
+		mdx({
+			syntaxHighlight: "shiki",
+			shikiConfig: { theme: "github-light" },
+		}),
+	],
 });

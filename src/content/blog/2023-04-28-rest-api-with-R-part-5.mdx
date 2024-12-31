@@ -27,7 +27,7 @@ Unfortunately, this can be problematic when building REST APIs using Rplumber. F
 
 It is possible to do parallel processing in R by using additional packages that allow for distributed processing across multiple threads or machines. In this case, we will use `future` and `promise` packages. That packages will handle parallel processing on something called workers. workers is another Rsession that can be use by main worker to execute R code. `future` use some strategies to run parallel processing, such as Sequential, Multisession, Multicore, and Cluster. . For more information on these strategies, you can visit [this link](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html). In our case, we will be using multisession strategy because it can run on any os including Windows, and any Rsession runs separately and does not use shared memory from main worker.
 
-![Parallel Processing](/assets/images/2023-04-28/1-parallel-processing.svg)
+![Parallel Processing](@assets/images/2023-04-28/1-parallel-processing.svg)
 
 > It's worth mentioning that if you're interested to know more about `future` and `promises` in Rplumber, you can refer to [this article](https://cran.r-project.org/web/packages/promises/vignettes/future_promise.html) or watch the video from Barret Schloerke, the maintainer of Rplumber, which can be found in [this link](https://posit.co/resources/videos/plumber-and-future-async-web-apis/).
 
