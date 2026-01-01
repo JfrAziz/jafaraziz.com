@@ -1,17 +1,25 @@
 ---
-import BlogList from "@components/blog/BlogList.astro";
-import Nav from "@components/layout/Nav.astro";
-import SectionHeader from "@components/layout/content/SectionHeader.astro";
-import Tag from "@components/layout/content/Tag.astro";
-import MainLayout from "@layouts/MainLayout.astro";
-import { getAllTags, getLatestPosts } from "@utils/blog";
+import Logo from "@/assets/logo.svg";
+import { ArrowLeftIcon } from "lucide-react";
+import Tag from "@/components/content/Tag.astro";
+import MainLayout from "@/components/layouts/MainLayout.astro";
+import SectionHeader from "@/components/content/SectionHeader.astro";
+import { getAllTags, getLatestPosts, getPostPath } from "@/utils/blog";
 
 const tags = await getAllTags();
 const posts = await getLatestPosts();
 ---
 
 <MainLayout title="Blog Posts">
-  <Nav />
+  <div class="pb-4 text-sm flex items-center justify-between select-none">
+    <a href="/" class="flex items-center">
+      <ArrowLeftIcon className="w-4 mr-2" />
+      <span class="flex-1 capitalize">Home</span>
+    </a>
+    <div class="flex items-center">
+      <a href="/" title="Home"><Logo /></a>
+    </div>
+  </div>
   <div id="blog" class="space-y-6">
     <div class="space-y-4 md:space-y-6 py-4">
       <SectionHeader title="Topics" description="Explore any topics" />
@@ -19,6 +27,33 @@ const posts = await getLatestPosts();
         {tags.map(tag => <Tag className="mb-4 mr-2" tag={tag} />)}
       </div>
     </div>
-    <BlogList posts={posts} />
+    <div class="space-y-6">
+      <SectionHeader title="Blog" description="Sorted by date" />
+      <ul class="space-y-5">
+        {posts.map(post => (
+          <li
+            class="text-sm text-gray-700 flex flex-col-reverse items-start border-b border-gray-200 md:border-none md:flex-row md:items-center md:space-x-4"
+          >
+            <div class="flex whitespace-nowrap space-x-4">
+              <div
+                class="select-none font-mono mb-1 px-2 bg-gray-800 text-white md:mb-0 md:px-0 md:bg-inherit md:text-gray-700"
+              >
+                {post.data.date.toISOString().split("T")[0]}
+              </div>
+              <div
+                class="select-none text-white text-xs font-bold min-w-max hidden md:flex md:items-center"
+              >
+                <Tag tag={post.data.tags[0] ?? "no tags"} />
+              </div>
+            </div>
+            <div
+              class="line-clamp-2 mb-2 md:line-clamp-1 md:mb-0 md:underline hover:cursor-pointer"
+            >
+              <a href={getPostPath(post.slug)}>{post.data.title}</a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   </div>
 </MainLayout>

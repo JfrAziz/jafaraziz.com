@@ -1,0 +1,65 @@
+---
+import "@/global.css";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/plus-jakarta-sans";
+
+import { SITE } from "@/const";
+
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const getOgImagePath = (filename: string = SITE.title) => {
+  let path = filename;
+
+  if (path.startsWith("/")) path = path.substring(1);
+
+  if (path.endsWith("/")) path = path.substring(0, path.length - 1);
+
+  if (path === "") path = SITE.title;
+
+  return `./open-graph/${path}.png`;
+};
+
+const ogImage = new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin)
+  .href;
+
+const fullTitle = `${title && `${title} - `}${SITE.title}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description ?? SITE.description} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description ?? SITE.description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={Astro.url.href} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@jfrAziz" />
+    <meta name="twitter:image" content={ogImage} />
+    <meta property="twitter:title" content={fullTitle} />
+    <meta
+      property="twitter:description"
+      content={description ?? SITE.description}
+    />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body class="bg-[#f2f2f2] selection:bg-gray-600 selection:text-white">
+    <slot />
+  </body>
+</html>

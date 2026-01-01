@@ -1,29 +1,123 @@
 ---
-import BlogItem from "@components/blog/BlogItem.astro";
-import SectionHeader from "@components/layout/content/SectionHeader.astro";
-import Hero from "@components/layout/home/Hero.astro";
-import MainLayout from "@layouts/MainLayout.astro";
-import { getLatestPosts, getTotalPosts } from "@utils/blog";
-import { Icon } from "astro-icon/components";
+import { ArrowRightIcon } from "lucide-react";
+import Tag from "@/components/content/Tag.astro";
+import MainLayout from "@/components/layouts/MainLayout.astro";
+import SectionHeader from "@/components/content/SectionHeader.astro";
+import { getLatestPosts, getTotalPosts, getPostPath } from "@/utils/blog";
 
 const posts = await getLatestPosts(15);
+
 const totalPost = await getTotalPosts();
 ---
 
 <MainLayout title="Homepage">
-  <Hero />
+  <div id="hero" class="mb-12">
+    <div class="py-8">
+      <h1 class="space-y-2 lg:space-y-4">
+        <div class="text-2xl lg:text-6xl font-mono font-extrabold text-gray-800">
+          Hi, I am
+        </div>
+        <div class="relative">
+          <div class="text-4xl lg:text-8xl font-extrabold flex">
+            <div class="bg-gray-800 px-4 lg:px-8 text-white">Jafar Aziz</div>
+          </div>
+        </div>
+      </h1>
+    </div>
+    <div class="prose">
+      <p>
+        Welcome to my website! I am a web developer, a Typescript user
+        (React/Next.js & Express), Laravel, and Java (Kotlin).
+      </p>
+      <p>
+        I am not expert, but I know a little bit about statistics, data science,
+        and data scraping with R and Python. Currently, I am working as Software
+        Engineer at <strong>Statistics Indonesia</strong>
+      </p>
+      <p>
+        I want to share my knowledge and experiences through this website. You can
+        also follow me on 
+        <span>
+          <a
+            href="https://github.com/jfrAziz"
+            target="_blank"
+            class="font-mono text-sm"
+            referrerpolicy="no-referrer"
+          >
+            Github
+          </a>
+          , 
+          <a
+            href="https://instagram.com/jafar.h.aziz"
+            target="_blank"
+            class="font-mono text-sm"
+            referrerpolicy="no-referrer"
+          >
+            Instagram
+          </a>
+          , 
+          <a
+            href="https://www.linkedin.com/in/jfraziz"
+            target="_blank"
+            class="font-mono text-sm"
+            referrerpolicy="no-referrer"
+          >
+            LinkedIn
+          </a>
+          , 
+          <a
+            href="mailto:aziz@jafaraziz.com"
+            class="font-mono text-sm"
+          >
+            Email
+          </a>
+           or 
+          <a
+            href="https://twitter.com/jfrAziz"
+            target="_blank"
+            class="font-mono text-sm"
+            referrerpolicy="no-referrer"
+          >
+            Twitter
+          </a>
+        </span>
+      </p>
+    </div>
+  </div>
   <div id="blog" class="space-y-6">
     <SectionHeader
       title="Blog"
       description={`Sometimes, I write tech stuff (${totalPost} posts)`}
     />
     <ul class="space-y-5">
-      {posts.map(post => <BlogItem slug={post.slug} {...post.data} />)}
+      {posts.map(post => (
+        <li
+          class="text-sm text-gray-700 flex flex-col-reverse items-start border-b border-gray-200 md:border-none md:flex-row md:items-center md:space-x-4"
+        >
+          <div class="flex whitespace-nowrap space-x-4">
+            <div
+              class="select-none font-mono mb-1 px-2 bg-gray-800 text-white md:mb-0 md:px-0 md:bg-inherit md:text-gray-700"
+            >
+              {post.data.date.toISOString().split("T")[0]}
+            </div>
+            <div
+              class="select-none text-white text-xs font-bold min-w-max hidden md:flex md:items-center"
+            >
+              <Tag tag={post.data.tags[0] ?? "no tags"} />
+            </div>
+          </div>
+          <div
+            class="line-clamp-2 mb-2 md:line-clamp-1 md:mb-0 md:underline hover:cursor-pointer"
+          >
+            <a href={getPostPath(post.slug)}>{post.data.title}</a>
+          </div>
+        </li>
+      ))}
     </ul>
     <div class="text-gray-700">
       <a href="/blog" class="text-sm flex items-center">
         <span>See All Posts</span>
-        <Icon class="w-4 ml-2" name="ph:arrow-right" />
+        <ArrowRightIcon className="w-4 ml-2"/>
       </a>
     </div>
   </div>

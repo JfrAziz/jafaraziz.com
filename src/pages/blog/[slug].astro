@@ -1,13 +1,14 @@
 ---
-import BlogLayout from "@layouts/BlogLayout.astro";
-import { getLatestPosts, modifySlug } from "@utils/blog";
+import { getLatestPosts, modifySlug } from "@/utils/blog";
+import BlogLayout from "@/components/layouts/BlogLayout.astro";
 
 export async function getStaticPaths() {
-	const blogs = await getLatestPosts();
-	return blogs.map((entry) => ({
-		params: { slug: modifySlug(entry.slug) }, // modify the default generated slug from astro-content
-		props: { entry },
-	}));
+  const blogs = await getLatestPosts();
+
+  return blogs.map((entry) => ({
+    params: { slug: modifySlug(entry.slug) }, // modify the default generated slug from astro-content
+    props: { entry },
+  }));
 }
 
 const { entry } = Astro.props;

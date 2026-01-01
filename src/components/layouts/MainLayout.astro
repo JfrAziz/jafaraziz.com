@@ -1,0 +1,48 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import { GithubIcon, LinkedinIcon, TwitterIcon } from "lucide-react";
+
+export type Props = {
+  title?: string;
+  description?: string;
+};
+---
+
+<BaseLayout {...Astro.props}>
+  <div class="max-w-2xl m-auto px-4 md:px-2 py-4">
+    <main class="mb-4">
+      <slot />
+    </main>
+    <footer
+      class="border-t text-sm font-mono pt-2 text-gray-700 flex justify-between items-center"
+    >
+      <span class="flex-1">{new Date().getFullYear()} - Jafar Aziz</span>
+      <div class="flex justify-center items-center space-x-2 md:space-x-3">
+        <a
+          title="twitter"
+          target="_blank"
+          referrerpolicy="no-referrer"
+          href="https://www.twitter.com/jfraziz/"
+        >
+          <TwitterIcon className="w-4 font-bold" />
+        </a>
+        <a
+          title="github"
+          target="_blank"
+          referrerpolicy="no-referrer"
+          href="https://www.github.com/jfraziz/"
+        >
+          <GithubIcon className="w-4 font-bold" />
+        </a>
+        <a
+          title="linkedin"
+          target="_blank"
+          referrerpolicy="no-referrer"
+          href="https://www.linkedin.com/in/jfraziz/"
+        >
+          <LinkedinIcon className="w-4 font-bold" />
+        </a>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>

@@ -1,14 +1,14 @@
 ---
-import Logo from "@components/layout/Logo.astro";
-import BaseLayout from "@layouts/BaseLayout.astro";
-import { Icon } from "astro-icon/components";
+import Logo from "@/assets/logo.svg";
+import { HouseIcon } from "lucide-react";
+import BaseLayout from "@/components/layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="No resources found">
   <div class="h-screen flex items-center justify-center">
     <div class="flex items-center justify-center">
       <div class="flex flex-col items-center space-y-8">
-        <Logo size={64} />
+        <img src={Logo.src} alt="Logo" style="width: 64px; height: 64px;" />
         <div class="font-mono text-sm">
           No Resource Found - {Astro.url.pathname}
         </div>
@@ -16,7 +16,7 @@ import { Icon } from "astro-icon/components";
           href="/"
           class="flex items-center border border-gray-700 py-1 px-2 rounded-sm"
         >
-          <Icon class="w-6 mr-2" name="ph:house-line-light" />
+          <HouseIcon className="w-6 mr-2" />
           <span class="font-mono text-sm">jafaraziz.com</span>
         </a>
       </div>
