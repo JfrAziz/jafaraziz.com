@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "./BaseLayout.astro";
+import BaseLayout from "./base-layout.astro";
 import { GithubIcon, LinkedinIcon, TwitterIcon } from "lucide-react";
 
 export type Props = {
@@ -14,7 +14,7 @@ export type Props = {
       <slot />
     </main>
     <footer
-      class="border-t text-sm font-mono pt-2 text-gray-700 flex justify-between items-center"
+      class="border-t text-sm font-mono pt-2 text-foreground flex justify-between items-center"
     >
       <span class="flex-1">{new Date().getFullYear()} - Jafar Aziz</span>
       <div class="flex justify-center items-center space-x-2 md:space-x-3">

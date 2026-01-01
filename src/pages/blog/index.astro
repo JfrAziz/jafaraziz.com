@@ -1,9 +1,9 @@
 ---
 import Logo from "@/assets/logo.svg";
 import { ArrowLeftIcon } from "lucide-react";
-import Tag from "@/components/content/Tag.astro";
-import MainLayout from "@/components/layouts/MainLayout.astro";
-import SectionHeader from "@/components/content/SectionHeader.astro";
+import Tag from "@/components/content/tag.astro";
+import MainLayout from "@/components/layouts/main-layout.astro";
+import SectionHeader from "@/components/content/section-header.astro";
 import { getAllTags, getLatestPosts, getPostPath } from "@/utils/blog";
 
 const tags = await getAllTags();
@@ -32,16 +32,16 @@ const posts = await getLatestPosts();
       <ul class="space-y-5">
         {posts.map(post => (
           <li
-            class="text-sm text-gray-700 flex flex-col-reverse items-start border-b border-gray-200 md:border-none md:flex-row md:items-center md:space-x-4"
+            class="text-sm text-foreground flex flex-col-reverse items-start border-b border-input md:border-none md:flex-row md:items-center md:space-x-4"
           >
             <div class="flex whitespace-nowrap space-x-4">
               <div
-                class="select-none font-mono mb-1 px-2 bg-gray-800 text-white md:mb-0 md:px-0 md:bg-inherit md:text-gray-700"
+                class="select-none font-mono mb-1 px-2 bg-primary text-primary-foreground md:mb-0 md:px-0 md:bg-inherit md:text-foreground"
               >
                 {post.data.date.toISOString().split("T")[0]}
               </div>
               <div
-                class="select-none text-white text-xs font-bold min-w-max hidden md:flex md:items-center"
+                class="select-none text-primary-foreground text-xs font-bold min-w-max hidden md:flex md:items-center"
               >
                 <Tag tag={post.data.tags[0] ?? "no tags"} />
               </div>

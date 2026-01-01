@@ -1,8 +1,8 @@
 ---
 import { ArrowRightIcon } from "lucide-react";
-import Tag from "@/components/content/Tag.astro";
-import MainLayout from "@/components/layouts/MainLayout.astro";
-import SectionHeader from "@/components/content/SectionHeader.astro";
+import Tag from "@/components/content/tag.astro";
+import MainLayout from "@/components/layouts/main-layout.astro";
+import SectionHeader from "@/components/content/section-header.astro";
 import { getLatestPosts, getTotalPosts, getPostPath } from "@/utils/blog";
 
 const posts = await getLatestPosts(15);
@@ -14,12 +14,12 @@ const totalPost = await getTotalPosts();
   <div id="hero" class="mb-12">
     <div class="py-8">
       <h1 class="space-y-2 lg:space-y-4">
-        <div class="text-2xl lg:text-6xl font-mono font-extrabold text-gray-800">
+        <div class="text-2xl lg:text-6xl font-mono font-extrabold text-primary">
           Hi, I am
         </div>
         <div class="relative">
           <div class="text-4xl lg:text-8xl font-extrabold flex">
-            <div class="bg-gray-800 px-4 lg:px-8 text-white">Jafar Aziz</div>
+            <div class="bg-primary px-4 lg:px-8 text-primary-foreground">Jafar Aziz</div>
           </div>
         </div>
       </h1>
@@ -92,16 +92,16 @@ const totalPost = await getTotalPosts();
     <ul class="space-y-5">
       {posts.map(post => (
         <li
-          class="text-sm text-gray-700 flex flex-col-reverse items-start border-b border-gray-200 md:border-none md:flex-row md:items-center md:space-x-4"
+          class="text-sm text-foreground flex flex-col-reverse items-start border-b border-input md:border-none md:flex-row md:items-center md:space-x-4"
         >
           <div class="flex whitespace-nowrap space-x-4">
             <div
-              class="select-none font-mono mb-1 px-2 bg-gray-800 text-white md:mb-0 md:px-0 md:bg-inherit md:text-gray-700"
+              class="select-none font-mono mb-1 px-2 bg-primary text-primary-foreground md:mb-0 md:px-0 md:bg-inherit md:text-foreground"
             >
               {post.data.date.toISOString().split("T")[0]}
             </div>
             <div
-              class="select-none text-white text-xs font-bold min-w-max hidden md:flex md:items-center"
+              class="select-none text-primary-foreground text-xs font-bold min-w-max hidden md:flex md:items-center"
             >
               <Tag tag={post.data.tags[0] ?? "no tags"} />
             </div>
@@ -114,7 +114,7 @@ const totalPost = await getTotalPosts();
         </li>
       ))}
     </ul>
-    <div class="text-gray-700">
+    <div class="text-foreground">
       <a href="/blog" class="text-sm flex items-center">
         <span>See All Posts</span>
         <ArrowRightIcon className="w-4 ml-2"/>

@@ -1,8 +1,8 @@
 ---
 import Logo from "@/assets/logo.svg";
-import MainLayout from "./MainLayout.astro";
+import MainLayout from "./main-layout.astro";
 import { ArrowLeftIcon } from "lucide-react";
-import Tag from "@/components/content/Tag.astro";
+import Tag from "@/components/content/tag.astro";
 import type { BlogFronmatter } from "@/content.config";
 
 type Props = {
@@ -25,7 +25,7 @@ const { title, date, tags } = Astro.props;
     </div>
   </div>
   <div class="mb-6 mt-2 border-b">
-    <div class="text-xs text-gray-700 mb-2">
+    <div class="text-xs text-foreground mb-2">
       {
         date.toLocaleDateString("en-US", {
           weekday: "long",
@@ -37,7 +37,7 @@ const { title, date, tags } = Astro.props;
     </div>
     <div class="space-y-4">
       <h1
-        class="font-bold text-gray-700 text-2xl leading-relaxed lg:text-4xl lg:leading-tight"
+        class="font-bold text-foreground text-2xl leading-relaxed lg:text-4xl lg:leading-tight"
       >
         {title}
       </h1>
@@ -47,7 +47,7 @@ const { title, date, tags } = Astro.props;
     </div>
   </div>
   <article
-    class="mt-2 mb-8 prose prose-headings:text-gray-700 prose-img:m-auto"
+    class="mt-2 mb-8 prose prose-headings:text-foreground prose-img:m-auto"
   >
     <slot />
   </article>

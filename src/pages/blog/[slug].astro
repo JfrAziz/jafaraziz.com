@@ -1,6 +1,6 @@
 ---
 import { getLatestPosts, modifySlug } from "@/utils/blog";
-import BlogLayout from "@/components/layouts/BlogLayout.astro";
+import BlogLayout from "@/components/layouts/blog-layout.astro";
 
 export async function getStaticPaths() {
   const blogs = await getLatestPosts();
